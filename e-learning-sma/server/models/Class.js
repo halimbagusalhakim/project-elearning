@@ -114,6 +114,53 @@ class Class {
     const [result] = await db.promise().execute(sql, [id]);
     return result.affectedRows;
   }
+
+  static async getTotalCount() {
+    const sql = 'SELECT COUNT(*) as total FROM classes';
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
+  static async getRecentClasses(limit = 5) {
+    const sql = 'SELECT * FROM classes ORDER BY created_at DESC LIMIT ?';
+    const [rows] = await db.promise().execute(sql, [limit]);
+    return rows;
+  }
+
+  static async getClassStatistics() {
+    try {
+      // Get total classes
+      const [totalResult] = await db.promise().execute('SELECT COUNT(*) as total FROM classes');
+      const totalClasses = totalResult[0].total;
+
+      // Get classes by teacher
+      const [teacherStats] = await db.promise().execute(`
+        SELECT u.nama_lengkap as teacher_name, COUNT(c.id) as class_count
+        FROM classes c
+        JOIN users u ON c.guru_id = u.id
+        GROUP BY c.guru_id, u.nama_lengkap
+        ORDER BY class_count DESC
+      `);
+
+      // Get class registration stats
+      const [registrationStats] = await db.promise().execute(`
+        SELECT c.nama_kelas, COUNT(cr.id) as student_count
+        FROM classes c
+        LEFT JOIN class_registrations cr ON c.id = cr.kelas_id AND cr.status = 'approved'
+        GROUP BY c.id, c.nama_kelas
+        ORDER BY student_count DESC
+      `);
+
+      return {
+        totalClasses,
+        teacherStats,
+        registrationStats
+      };
+    } catch (error) {
+      console.error('Error in getClassStatistics:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Class;

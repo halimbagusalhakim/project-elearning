@@ -1,0 +1,147 @@
+@startuml Class Diagram E-Learning SMA
+
+class User {
+    +id: INT
+    +username: VARCHAR(50)
+    +email: VARCHAR(100)
+    +password: VARCHAR(255)
+    +role: ENUM('siswa', 'guru', 'admin')
+    +nama_lengkap: VARCHAR(100)
+    +kelas: VARCHAR(10)
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(userData): Promise<INT>
+    +{static} findByUsername(username: VARCHAR): Promise<User>
+    +{static} findByEmail(email: VARCHAR): Promise<User>
+    +{static} findById(id: INT): Promise<User>
+    +{static} getAllStudents(): Promise<User[]>
+    +{static} getAllTeachers(): Promise<User[]>
+    +{static} updatePassword(id: INT, newPassword: VARCHAR): Promise<BOOLEAN>
+    +{static} updateProfile(id: INT, profileData): Promise<BOOLEAN>
+    +{static} getTotalCount(): Promise<INT>
+    +{static} getUserStatsByRole(): Promise<Object[]>
+    +{static} delete(id: INT): Promise<INT>
+}
+
+class Class {
+    +id: INT
+    +nama_kelas: VARCHAR(50)
+    +kode_kelas: VARCHAR(20)
+    +guru_id: INT
+    +deskripsi: TEXT
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(classData): Promise<INT>
+    +{static} getAll(): Promise<Class[]>
+    +{static} findById(id: INT): Promise<Class>
+    +{static} findByCode(kode_kelas: VARCHAR): Promise<Class>
+    +{static} getClassesByTeacher(guru_id: INT): Promise<Class[]>
+    +{static} update(id: INT, classData): Promise<INT>
+    +{static} delete(id: INT): Promise<INT>
+    +{static} getTotalCount(): Promise<INT>
+    +{static} getClassStatistics(): Promise<Object>
+}
+
+class Material {
+    +id: INT
+    +kelas_id: INT
+    +judul: VARCHAR(255)
+    +deskripsi: TEXT
+    +file_path: VARCHAR(255)
+    +file_type: VARCHAR(50)
+    +created_by: INT
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(materialData): Promise<INT>
+    +{static} getByClassId(kelas_id: INT): Promise<Material[]>
+    +{static} findById(id: INT): Promise<Material>
+    +{static} update(id: INT, materialData): Promise<INT>
+    +{static} delete(id: INT): Promise<INT>
+    +{static} getStudentMaterials(studentId: INT): Promise<Material[]>
+}
+
+class Assignment {
+    +id: INT
+    +kelas_id: INT
+    +judul: VARCHAR(255)
+    +deskripsi: TEXT
+    +file_path: VARCHAR(255)
+    +file_type: VARCHAR(50)
+    +deadline: DATETIME
+    +created_by: INT
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(assignmentData): Promise<INT>
+    +{static} getByClassId(kelas_id: INT): Promise<Assignment[]>
+    +{static} getByTeacherId(teacher_id: INT): Promise<Assignment[]>
+    +{static} findById(id: INT): Promise<Assignment>
+    +{static} update(id: INT, assignmentData): Promise<INT>
+    +{static} delete(id: INT): Promise<INT>
+    +{static} getByStudentId(studentId: INT): Promise<Assignment[]>
+    +{static} getStudentStats(studentId: INT): Promise<Object>
+}
+
+class Submission {
+    +id: INT
+    +assignment_id: INT
+    +siswa_id: INT
+    +file_path: VARCHAR(255)
+    +file_type: VARCHAR(50)
+    +komentar: TEXT
+    +nilai: DECIMAL(5,2)
+    +status: ENUM('submitted', 'graded', 'late')
+    +submitted_at: TIMESTAMP
+    +graded_at: TIMESTAMP
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(submissionData): Promise<INT>
+    +{static} findByAssignmentId(assignment_id: INT): Promise<Submission[]>
+    +{static} findById(id: INT): Promise<Submission>
+    +{static} update(id: INT, data): Promise<INT>
+    +{static} delete(id: INT): Promise<INT>
+    +{static} getSubmissionStatistics(): Promise<Object>
+}
+
+class ClassRegistration {
+    +id: INT
+    +kelas_id: INT
+    +siswa_id: INT
+    +status: ENUM('pending', 'approved', 'rejected')
+    +created_at: TIMESTAMP
+    +updated_at: TIMESTAMP
+
+    +{static} createTable(): Promise
+    +{static} create(registrationData): Promise<INT>
+    +{static} findById(id: INT): Promise<ClassRegistration>
+    +{static} findByClassAndStudent(kelas_id: INT, siswa_id: INT): Promise<ClassRegistration>
+    +{static} getPendingRegistrationsByClass(kelas_id: INT): Promise<ClassRegistration[]>
+    +{static} getApprovedStudentsByClass(kelas_id: INT): Promise<ClassRegistration[]>
+    +{static} updateStatus(id: INT, status: VARCHAR): Promise<INT>
+    +{static} delete(id: INT): Promise<INT>
+    +{static} getStudentRegistrations(siswa_id: INT): Promise<ClassRegistration[]>
+}
+
+' Relationships
+User ||--o{ Class : teaches
+User ||--o{ Material : creates
+User ||--o{ Assignment : creates
+User ||--o{ ClassRegistration : registers
+User ||--o{ Submission : submits
+
+Class ||--o{ Material : contains
+Class ||--o{ Assignment : contains
+Class ||--o{ ClassRegistration : has registrations
+
+Assignment ||--o{ Submission : has submissions
+
+@enduml

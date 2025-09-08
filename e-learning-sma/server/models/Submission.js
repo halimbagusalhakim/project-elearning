@@ -108,6 +108,45 @@ const Submission = {
       [id]
     );
     return result.affectedRows;
+  },
+
+  getTotalCount: async () => {
+    const [rows] = await db.promise().execute('SELECT COUNT(*) as total FROM submissions');
+    return rows;
+  },
+
+  getSubmissionStatistics: async () => {
+    try {
+      // Get total submissions
+      const [totalResult] = await db.promise().execute('SELECT COUNT(*) as total FROM submissions');
+      const totalSubmissions = totalResult[0].total;
+
+      // Get submissions by status
+      const [statusStats] = await db.promise().execute(`
+        SELECT status, COUNT(*) as count
+        FROM submissions
+        GROUP BY status
+      `);
+
+      // Get average grades
+      const [gradeStats] = await db.promise().execute(`
+        SELECT
+          AVG(nilai) as average_grade,
+          MIN(nilai) as min_grade,
+          MAX(nilai) as max_grade
+        FROM submissions
+        WHERE nilai IS NOT NULL
+      `);
+
+      return {
+        totalSubmissions,
+        statusStats,
+        gradeStats: gradeStats[0]
+      };
+    } catch (error) {
+      console.error('Error in getSubmissionStatistics:', error);
+      throw error;
+    }
   }
 };
 

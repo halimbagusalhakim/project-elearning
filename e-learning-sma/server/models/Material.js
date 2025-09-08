@@ -110,6 +110,12 @@ class Material {
       throw error;
     }
   }
+
+  static async getTotalCount() {
+    const sql = 'SELECT COUNT(*) as total FROM materials';
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
 }
 
 module.exports = Material;

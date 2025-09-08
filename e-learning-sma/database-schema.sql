@@ -97,6 +97,20 @@ INSERT INTO submissions (assignment_id, siswa_id, komentar, status) VALUES
 (1, 2, 'Sudah selesai mengerjakan', 'submitted'),
 (2, 2, 'Sedang mengerjakan', 'submitted');
 
+CREATE TABLE submissions (
+  id int NOT NULL,
+  assignment_id int NOT NULL,
+  siswa_id int NOT NULL,
+  file_path varchar(255) DEFAULT NULL,
+  file_type varchar(50) DEFAULT NULL,
+  komentar text,
+  nilai decimal(5,2) DEFAULT NULL,
+  status enum('submitted','graded','late') DEFAULT 'submitted',
+  submitted_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  graded_at timestamp NULL DEFAULT NULL,
+  created_at timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
 -- Show table structure
 DESCRIBE users;
 DESCRIBE classes;

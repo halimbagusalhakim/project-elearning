@@ -23,6 +23,11 @@ const getMaterialById = async (req, res) => {
 
 const createMaterial = async (req, res) => {
   const { kelas_id, judul, deskripsi } = req.body;
+
+  if (!kelas_id || isNaN(parseInt(kelas_id))) {
+    return res.status(400).json({ error: 'Invalid or missing kelas_id' });
+  }
+
   let file_path = null;
   let file_type = null;
 

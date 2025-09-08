@@ -79,6 +79,43 @@ class User {
     const [result] = await db.promise().execute(sql, [nama_lengkap, username, email, id]);
     return result.affectedRows > 0;
   }
+
+  // Admin-specific methods
+  static async getTotalCount() {
+    const sql = 'SELECT COUNT(*) as total FROM users';
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
+  static async getUserStatsByRole() {
+    const sql = 'SELECT role, COUNT(*) as count FROM users GROUP BY role';
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
+  static async getAllWithPagination(limit = 50, offset = 0) {
+    const sql = 'SELECT id, username, email, role, nama_lengkap, kelas, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?';
+    const [rows] = await db.promise().execute(sql, [limit, offset]);
+    return rows;
+  }
+
+  static async updateRole(id, role) {
+    const sql = 'UPDATE users SET role = ? WHERE id = ?';
+    const [result] = await db.promise().execute(sql, [role, id]);
+    return result;
+  }
+
+  static async delete(id) {
+    const sql = 'DELETE FROM users WHERE id = ?';
+    const [result] = await db.promise().execute(sql, [id]);
+    return result;
+  }
+
+  static async getRecentUsers(limit = 10) {
+    const sql = 'SELECT id, username, email, role, nama_lengkap, created_at FROM users ORDER BY created_at DESC LIMIT ' + limit;
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
 }
 
 module.exports = User;

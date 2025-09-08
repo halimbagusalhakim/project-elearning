@@ -23,40 +23,53 @@ const Sidebar = () => {
       .slice(0, 2);
   };
 
+  const getRoleDisplayName = () => {
+    switch (user.role) {
+      case 'guru':
+        return 'Guru';
+      case 'admin':
+        return 'Admin';
+      case 'siswa':
+        return 'Siswa';
+      default:
+        return 'User';
+    }
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
         <h3>E-Learning SMA</h3>
         <small>Learning Management System</small>
       </div>
-      
+
       <nav className="sidebar-nav">
-        <NavLink 
-          to="/dashboard" 
+        <NavLink
+          to="/dashboard"
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
         >
           <span className="icon-dashboard"></span>
           Dashboard
         </NavLink>
-        
-        {user.role === 'guru' && (
+
+        {(user.role === 'guru' || user.role === 'admin') && (
           <>
-            <NavLink 
-              to="/manajemen-kelas" 
+            <NavLink
+              to="/manajemen-kelas"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <span className="icon-class"></span>
               Manajemen Kelas
             </NavLink>
-            <NavLink 
-              to="/manajemen-materi" 
+            <NavLink
+              to="/manajemen-materi"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <span className="icon-material"></span>
               Manajemen Materi
             </NavLink>
-            <NavLink 
-              to="/manajemen-tugas" 
+            <NavLink
+              to="/manajemen-tugas"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <span className="icon-assignment"></span>
@@ -64,18 +77,18 @@ const Sidebar = () => {
             </NavLink>
           </>
         )}
-        
+
         {user.role === 'siswa' && (
           <>
-            <NavLink 
-              to="/kelas-saya" 
+            <NavLink
+              to="/kelas-saya"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <span className="icon-class"></span>
               Kelas Saya
             </NavLink>
-            <NavLink 
-              to="/materi-saya" 
+            <NavLink
+              to="/materi-saya"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
             >
               <span className="icon-material"></span>
@@ -95,21 +108,18 @@ const Sidebar = () => {
               <span className="icon-report"></span>
               Laporan Nilai Tugas
             </NavLink>
-
           </>
         )}
-        
-        <NavLink 
-          to="/profil" 
+
+        <NavLink
+          to="/profil"
           className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
         >
           <span className="icon-user"></span>
           Profil
         </NavLink>
-        
-
       </nav>
-      
+
       <div className="sidebar-footer">
         <div className="sidebar-user">
           <div className="sidebar-user-avatar">
@@ -120,12 +130,12 @@ const Sidebar = () => {
               {user.nama_lengkap || 'User'}
             </div>
             <div className="sidebar-user-role">
-              {user.role === 'guru' ? 'Guru' : 'Siswa'}
+              {getRoleDisplayName()}
             </div>
           </div>
         </div>
-        
-        <button 
+
+        <button
           className="sidebar-link"
           onClick={handleLogout}
           style={{ marginTop: '12px', cursor: 'pointer', border: 'none', textAlign: 'left' }}

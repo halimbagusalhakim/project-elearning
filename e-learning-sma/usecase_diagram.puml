@@ -1,0 +1,84 @@
+@startuml Use Case Diagram - E-Learning SMA
+
+actor "Siswa" as Siswa
+actor "Guru" as Guru
+actor "Admin" as Admin
+
+rectangle "Authentication" {
+    usecase "Login" as UC1
+}
+
+rectangle "Class Management" {
+    usecase "Register for Class" as UC2
+    usecase "Create Class" as UC3
+    usecase "Manage Registrations" as UC4
+    usecase "View My Classes" as UC5
+    usecase "Manage Classes" as UC6
+}
+
+rectangle "Material Management" {
+    usecase "Upload Material" as UC7
+    usecase "View Materials" as UC8
+}
+
+rectangle "Assignment Management" {
+    usecase "Create Assignment" as UC9
+    usecase "View Assignments" as UC10
+    usecase "Submit Assignment" as UC11
+    usecase "View Submissions" as UC12
+    usecase "Grade Submissions" as UC13
+}
+
+rectangle "Reports" {
+    usecase "View Reports" as UC14
+    usecase "View System Reports" as UC15
+}
+
+rectangle "Profile" {
+    usecase "Manage Profile" as UC16
+}
+
+rectangle "User Management" {
+    usecase "Manage Users" as UC17
+}
+
+' Siswa use cases
+Siswa --> UC1
+Siswa --> UC2
+Siswa --> UC5
+Siswa --> UC8
+Siswa --> UC10
+Siswa --> UC11
+Siswa --> UC14
+Siswa --> UC16
+
+' Guru use cases
+Guru --> UC1
+Guru --> UC3
+Guru --> UC4
+Guru --> UC5
+Guru --> UC6
+Guru --> UC7
+Guru --> UC8
+Guru --> UC9
+Guru --> UC10
+Guru --> UC12
+Guru --> UC13
+Guru --> UC14
+Guru --> UC16
+
+' Admin use cases
+Admin --> UC1
+Admin --> UC6
+Admin --> UC15
+Admin --> UC16
+Admin --> UC17
+
+' Relationships
+UC2 ..> UC4 : includes
+UC3 ..> UC4 : includes
+UC9 ..> UC11 : includes
+UC10 ..> UC11 : includes
+UC12 ..> UC13 : includes
+
+@enduml

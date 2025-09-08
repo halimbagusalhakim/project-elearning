@@ -418,6 +418,50 @@ class Assignment {
       throw error;
     }
   }
+
+  static async getTotalCount() {
+    const sql = 'SELECT COUNT(*) as total FROM assignments';
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
+  static async getAssignmentStatistics() {
+    try {
+      // Get total assignments
+      const [totalResult] = await db.promise().execute('SELECT COUNT(*) as total FROM assignments');
+      const totalAssignments = totalResult[0].total;
+
+      // Get assignments by class
+      const [classStats] = await db.promise().execute(`
+        SELECT c.nama_kelas, COUNT(a.id) as assignment_count
+        FROM assignments a
+        JOIN classes c ON a.kelas_id = c.id
+        GROUP BY a.kelas_id, c.nama_kelas
+        ORDER BY assignment_count DESC
+      `);
+
+      // Get submission statistics
+      const [submissionStats] = await db.promise().execute(`
+        SELECT
+          a.judul,
+          COUNT(s.id) as submission_count,
+          AVG(s.nilai) as average_grade
+        FROM assignments a
+        LEFT JOIN submissions s ON a.id = s.assignment_id
+        GROUP BY a.id, a.judul
+        ORDER BY submission_count DESC
+      `);
+
+      return {
+        totalAssignments,
+        classStats,
+        submissionStats
+      };
+    } catch (error) {
+      console.error('Error in getAssignmentStatistics:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = Assignment;

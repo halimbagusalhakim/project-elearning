@@ -77,6 +77,12 @@ const ManajemenMateri = () => {
 
   const handleCreateMaterial = async (e) => {
     e.preventDefault();
+
+    if (!createData.kelas_id) {
+      setCreateError('Kelas belum dipilih. Silakan pilih kelas terlebih dahulu.');
+      return;
+    }
+
     setCreateLoading(true);
     setCreateError('');
 

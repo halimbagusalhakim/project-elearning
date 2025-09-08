@@ -9,6 +9,7 @@ const classRoutes = require('./routes/classRoutes');
 const materialRoutes = require('./routes/materialRoutes');
 const assignmentRoutes = require('./routes/assignmentRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 // Import models for table creation
 const User = require('./models/User');
@@ -33,6 +34,7 @@ app.use('/api/classes', classRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
