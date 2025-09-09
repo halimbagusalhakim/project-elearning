@@ -14,6 +14,7 @@ import TugasSaya from './pages/TugasSaya';
 import ManajemenKelas from './pages/ManajemenKelas';
 import ManajemenMateri from './pages/ManajemenMateri';
 import ManajemenTugas from './pages/ManajemenTugas';
+import AdminUserManagement from './pages/AdminUserManagement';
 
 import Profil from './pages/Profil';
 import DetailTugas from './pages/DetailTugas';
@@ -74,14 +75,16 @@ const App = () => {
           <Route path="/laporan-nilai-tugas" element={isAuthenticated() && user.role === 'siswa' ? <LaporanNilaiTugas /> : <Navigate to="/" />} />
 
           {/* Routes for guru */}
-          <Route path="/manajemen-kelas" element={isAuthenticated() && user.role === 'guru' ? <ManajemenKelas /> : <Navigate to="/" />} />
           <Route path="/manajemen-materi" element={isAuthenticated() && user.role === 'guru' ? <ManajemenMateri /> : <Navigate to="/" />} />
           <Route path="/manajemen-tugas" element={isAuthenticated() && user.role === 'guru' ? <ManajemenTugas /> : <Navigate to="/" />} />
 
           {/* Routes for admin */}
-          <Route path="/manajemen-kelas" element={isAuthenticated() && user.role === 'admin' ? <ManajemenKelas /> : <Navigate to="/" />} />
-          <Route path="/manajemen-materi" element={isAuthenticated() && user.role === 'admin' ? <ManajemenMateri /> : <Navigate to="/" />} />
-          <Route path="/manajemen-tugas" element={isAuthenticated() && user.role === 'admin' ? <ManajemenTugas /> : <Navigate to="/" />} />
+          <Route path="/admin/manajemen-pengguna" element={isAuthenticated() && user.role === 'admin' ? <AdminUserManagement /> : <Navigate to="/" />} />
+
+          {/* Routes for both guru and admin */}
+          <Route path="/manajemen-kelas" element={isAuthenticated() && (user.role === 'guru' || user.role === 'admin') ? <ManajemenKelas /> : <Navigate to="/" />} />
+          <Route path="/manajemen-materi" element={isAuthenticated() && (user.role === 'guru' || user.role === 'admin') ? <ManajemenMateri /> : <Navigate to="/" />} />
+          <Route path="/manajemen-tugas" element={isAuthenticated() && (user.role === 'guru' || user.role === 'admin') ? <ManajemenTugas /> : <Navigate to="/" />} />
 
           {/* Common routes */}
           <Route path="/profil" element={isAuthenticated() ? <Profil /> : <Navigate to="/" />} />

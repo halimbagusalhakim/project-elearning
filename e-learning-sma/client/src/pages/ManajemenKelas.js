@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { classesAPI } from '../services/api';
+import { classesAPI, adminAPI } from '../services/api';
 import '../styles/dashboard.css';
 
 const ManajemenKelas = () => {
@@ -18,8 +18,10 @@ const ManajemenKelas = () => {
   const [createData, setCreateData] = useState({
     nama_kelas: '',
     kode_kelas: '',
-    deskripsi: ''
+    deskripsi: '',
+    guru_id: ''
   });
+  const [teachers, setTeachers] = useState([]);
   const [editData, setEditData] = useState({
     nama_kelas: '',
     kode_kelas: '',
@@ -30,15 +32,41 @@ const ManajemenKelas = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [createError, setCreateError] = useState('');
   const [editError, setEditError] = useState('');
+  const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    fetchTeacherClasses();
+    // Get user role from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    setUserRole(user.role || '');
+    fetchClasses();
+    if (user.role === 'admin') {
+      fetchTeachers();
+    }
   }, []);
 
-  const fetchTeacherClasses = async () => {
+  const fetchTeachers = async () => {
+    try {
+      const response = await adminAPI.getTeachers();
+      setTeachers(response.data);
+    } catch (error) {
+      console.error('Error fetching teachers:', error);
+    }
+  };
+
+  const fetchClasses = async () => {
     try {
       setLoading(true);
-      const response = await classesAPI.getTeacherClasses();
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      let response;
+
+      if (user.role === 'admin') {
+        // Admin can see all classes
+        response = await classesAPI.getAll();
+      } else {
+        // Guru can only see their own classes
+        response = await classesAPI.getTeacherClasses();
+      }
+
       setMyClasses(response.data);
     } catch (error) {
       setError('Gagal memuat kelas');
@@ -79,8 +107,8 @@ const ManajemenKelas = () => {
     try {
       await classesAPI.create(createData);
       setShowCreateModal(false);
-      setCreateData({ nama_kelas: '', kode_kelas: '', deskripsi: '' });
-      fetchTeacherClasses();
+      setCreateData({ nama_kelas: '', kode_kelas: '', deskripsi: '', guru_id: '' });
+      fetchClasses();
     } catch (error) {
       console.error('Error creating class:', error);
       if (error.response?.data?.error) {
@@ -324,6 +352,25 @@ const ManajemenKelas = () => {
                   placeholder="Deskripsi singkat tentang kelas"
                 />
               </div>
+              {userRole === 'admin' && (
+                <div className="form-group">
+                  <label htmlFor="guru_id">Guru Pengajar:</label>
+                  <select
+                    id="guru_id"
+                    name="guru_id"
+                    value={createData.guru_id}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Pilih Guru</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher.id} value={teacher.id}>
+                        {teacher.nama_lengkap}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="modal-actions">
                 <button
                   type="button"

@@ -3,6 +3,8 @@ const Class = require('../models/Class');
 const Material = require('../models/Material');
 const Assignment = require('../models/Assignment');
 const Submission = require('../models/Submission');
+const db = require('../config/db');
+const bcrypt = require('bcrypt');
 
 // Get admin dashboard statistics
 const getDashboardStats = async (req, res) => {
@@ -59,23 +61,48 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-// Get all users with pagination
+// Get all users with pagination and optional filtering by role and username
 const getAllUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
+    const { role, username } = req.query;
 
-    const users = await User.getAllWithPagination(limit, offset);
-    const [totalCount] = await User.getTotalCount();
+    // Build dynamic WHERE clause based on filters
+    let whereClauses = [];
+    let params = [];
+
+    if (role) {
+      whereClauses.push('role = ?');
+      params.push(role);
+    }
+    if (username) {
+      whereClauses.push('username LIKE ?');
+      params.push(`%${username}%`);
+    }
+
+    let whereSQL = '';
+    if (whereClauses.length > 0) {
+      whereSQL = ' WHERE ' + whereClauses.join(' AND ');
+    }
+
+    // Query total count with filters
+    const countSQL = `SELECT COUNT(*) as total FROM users${whereSQL}`;
+    const [countRows] = await db.promise().execute(countSQL, params);
+    const total = countRows[0]?.total || 0;
+
+    // Query users with filters and pagination
+    const usersSQL = `SELECT id, username, email, role, nama_lengkap, kelas, created_at FROM users${whereSQL} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    const [users] = await db.promise().execute(usersSQL, params);
 
     res.json({
       users,
       pagination: {
         page,
         limit,
-        total: totalCount.total,
-        totalPages: Math.ceil(totalCount.total / limit)
+        total,
+        totalPages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
@@ -102,6 +129,47 @@ const updateUserRole = async (req, res) => {
     res.json({ message: 'User role updated successfully' });
   } catch (error) {
     console.error('Error updating user role:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Update user (full user data)
+const updateUser = async (req, res) => {
+  const { userId } = req.params;
+  const { username, email, role, nama_lengkap, kelas } = req.body;
+
+  // Validate required fields
+  if (!username || !email || !role || !nama_lengkap) {
+    return res.status(400).json({ error: 'Username, email, role, and nama_lengkap are required' });
+  }
+
+  // Validate role
+  if (!['siswa', 'guru', 'admin'].includes(role)) {
+    return res.status(400).json({ error: 'Role must be siswa, guru, or admin' });
+  }
+
+  try {
+    // Check if username already exists (excluding current user)
+    const existingUser = await User.findByUsername(username);
+    if (existingUser && existingUser.id != userId) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    // Check if email already exists (excluding current user)
+    const existingEmail = await User.findByEmail(email);
+    if (existingEmail && existingEmail.id != userId) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    // Update the user
+    const success = await User.updateUser(userId, { username, email, role, nama_lengkap, kelas });
+    if (!success) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User updated successfully' });
+  } catch (error) {
+    console.error('Error updating user:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -146,10 +214,78 @@ const getSystemReports = async (req, res) => {
   }
 };
 
+// Create new user (admin only)
+const createUser = async (req, res) => {
+  const { username, email, password, role, nama_lengkap, kelas } = req.body;
+
+  // Validate required fields
+  if (!username || !email || !password || !role || !nama_lengkap) {
+    return res.status(400).json({ error: 'Username, email, password, role, and nama_lengkap are required' });
+  }
+
+  // Validate role
+  if (!['siswa', 'guru'].includes(role)) {
+    return res.status(400).json({ error: 'Role must be either siswa or guru' });
+  }
+
+  // Validate password length
+  if (!password || password.length < 6 || password.length > 8) {
+    return res.status(400).json({ error: 'Password harus memiliki panjang antara 6 hingga 8 karakter' });
+  }
+
+  try {
+    // Check if username already exists
+    const existingUser = await User.findByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create the user
+    const userId = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      nama_lengkap,
+      kelas: kelas || null
+    });
+
+    res.status(201).json({
+      id: userId,
+      username,
+      email,
+      role,
+      nama_lengkap,
+      kelas,
+      message: 'User created successfully'
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Get all teachers
+const getTeachers = async (req, res) => {
+  try {
+    const teachers = await User.getUsersByRole('guru');
+    res.json(teachers);
+  } catch (error) {
+    console.error('Error fetching teachers:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 module.exports = {
   getDashboardStats,
   getAllUsers,
   updateUserRole,
+  updateUser,
   deleteUser,
-  getSystemReports
+  getSystemReports,
+  createUser,
+  getTeachers
 };

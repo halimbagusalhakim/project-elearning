@@ -10,9 +10,6 @@ const DashboardAdmin = () => {
     totalAssignments: 0,
   });
   const [userStats, setUserStats] = useState([]);
-  const [recentUsers, setRecentUsers] = useState([]);
-  const [recentClasses, setRecentClasses] = useState([]);
-  const [recentMaterials, setRecentMaterials] = useState([]);
 
   useEffect(() => {
     // Fetch system statistics from backend API
@@ -29,9 +26,6 @@ const DashboardAdmin = () => {
         });
 
         setUserStats(data.stats.userStats);
-        setRecentUsers(data.recent.users);
-        setRecentClasses(data.recent.classes);
-        setRecentMaterials(data.recent.materials);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       }
@@ -40,81 +34,48 @@ const DashboardAdmin = () => {
     fetchDashboardData();
   }, []);
 
+  // Debug: Log user role and current path
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    console.log('DashboardAdmin user role:', user.role);
+    console.log('Current URL:', window.location.pathname);
+  }, []);
+
   return (
     <div className="dashboard-container">
-      <h2>Dashboard Admin</h2>
-      <p>Selamat datang di panel administrasi e-learning SMA</p>
+      <h2 className="dashboard-header">Dashboard Admin</h2>
+      <p className="dashboard-subtitle">Selamat datang di panel administrasi e-learning SMA</p>
 
       <div className="dashboard-grid">
-        <div className="dashboard-card">
+        <div className="card card-hover">
           <h3>Statistik Sistem</h3>
           <div className="stats-grid">
             <div className="stat-item">
-              <div className="stat-value">{stats.totalUsers}</div>
+              <div className="stat-number">{stats.totalUsers}</div>
               <div className="stat-label">Total Pengguna</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">{stats.totalClasses}</div>
+              <div className="stat-number">{stats.totalClasses}</div>
               <div className="stat-label">Total Kelas</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">{stats.totalMaterials}</div>
+              <div className="stat-number">{stats.totalMaterials}</div>
               <div className="stat-label">Total Materi</div>
             </div>
             <div className="stat-item">
-              <div className="stat-value">{stats.totalAssignments}</div>
+              <div className="stat-number">{stats.totalAssignments}</div>
               <div className="stat-label">Total Tugas</div>
             </div>
           </div>
         </div>
 
-        <div className="dashboard-card">
+        <div className="card card-hover">
           <h3>Statistik Pengguna</h3>
-          <ul className="user-stats-list">
+          <ul className="user-stats-list" style={{ listStyleType: 'none', paddingLeft: 0 }}>
             {userStats.map((stat) => (
-              <li key={stat.role}>
-                <span className="role-label">{stat.role.charAt(0).toUpperCase() + stat.role.slice(1)}</span>
-                <span className="role-count">{stat.count}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Pengguna Terbaru</h3>
-          <ul className="recent-users-list">
-            {recentUsers.map((user) => (
-              <li key={user.id} className="recent-user-item">
-                <strong>{user.nama_lengkap}</strong>
-                <div>Username: {user.username}</div>
-                <div>Role: {user.role}</div>
-                <div>Dibuat: {new Date(user.created_at).toLocaleDateString()}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Kelas Terbaru</h3>
-          <ul className="recent-classes-list">
-            {recentClasses.map((kelas) => (
-              <li key={kelas.id} className="recent-class-item">
-                <strong>{kelas.nama_kelas}</strong>
-                <div>Guru: {kelas.guru_nama}</div>
-                <div>Dibuat: {new Date(kelas.created_at).toLocaleDateString()}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="dashboard-card">
-          <h3>Materi Terbaru</h3>
-          <ul className="recent-materials-list">
-            {recentMaterials.map((material) => (
-              <li key={material.id} className="recent-material-item">
-                <strong>{material.judul}</strong>
-                <div>Oleh: {material.created_by_name}</div>
-                <div>Dibuat: {new Date(material.created_at).toLocaleDateString()}</div>
+              <li key={stat.role} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e5e7eb' }}>
+                <span className="role-label" style={{ fontWeight: '600', textTransform: 'capitalize' }}>{stat.role}</span>
+                <span className="role-count" style={{ fontWeight: '700' }}>{stat.count}</span>
               </li>
             ))}
           </ul>

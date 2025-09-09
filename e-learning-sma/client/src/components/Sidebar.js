@@ -54,6 +54,15 @@ const Sidebar = () => {
 
         {(user.role === 'guru' || user.role === 'admin') && (
           <>
+            {user.role === 'admin' && (
+              <NavLink
+                to="/admin/manajemen-pengguna"
+                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+              >
+                <span className="icon-user"></span>
+                Manajemen Pengguna
+              </NavLink>
+            )}
             <NavLink
               to="/manajemen-kelas"
               className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}

@@ -1,10 +1,16 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 const register = async (req, res) => {
   const { username, email, password, nama_lengkap, kelas } = req.body;
+
+  // Validate password length
+  if (!password || password.length < 6 || password.length > 8) {
+    return res.status(400).json({ error: 'Password harus memiliki panjang antara 6 hingga 8 karakter' });
+  }
 
   try {
     const existingUser = await User.findByUsername(username);
@@ -12,7 +18,8 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    const userId = await User.create({ username, email, password, nama_lengkap, kelas });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userId = await User.create({ username, email, password: hashedPassword, role: 'siswa', nama_lengkap, kelas });
     res.status(201).json({ id: userId, username });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -24,7 +31,7 @@ const login = async (req, res) => {
 
   try {
     const user = await User.findByUsername(username);
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -56,6 +63,11 @@ const changePassword = async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const userId = req.user.id;
 
+  // Validate new password length
+  if (!newPassword || newPassword.length < 6 || newPassword.length > 8) {
+    return res.status(400).json({ error: 'Password baru harus memiliki panjang antara 6 hingga 8 karakter' });
+  }
+
   try {
     // Get user from database to verify current password
     const user = await User.findByIdWithPassword(userId);
@@ -68,12 +80,16 @@ const changePassword = async (req, res) => {
     const trimmedNewPassword = newPassword.trim();
 
     // Verify current password
-    if (user.password !== trimmedCurrentPassword) {
+    const isCurrentPasswordValid = await bcrypt.compare(trimmedCurrentPassword, user.password);
+    if (!isCurrentPasswordValid) {
       return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(trimmedNewPassword, 10);
+
     // Update password
-    const updated = await User.updatePassword(userId, trimmedNewPassword);
+    const updated = await User.updatePassword(userId, hashedNewPassword);
     if (!updated) {
       return res.status(500).json({ error: 'Failed to update password' });
     }

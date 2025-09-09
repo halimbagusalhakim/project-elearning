@@ -78,13 +78,14 @@ class Material {
   static async getRecentMaterials(limit = 10) {
     try {
       // First try a simple query without joins
+      const limitNum = Math.floor(Number(limit));
       const sql = `
         SELECT * FROM materials
         ORDER BY created_at DESC
-        LIMIT ${limit}
+        LIMIT ${limitNum}
       `;
-      console.log('Executing simple SQL for recent materials:', sql, 'with limit:', limit);
-      const [rows] = await db.promise().execute(sql, [limit]);
+      console.log('Executing simple SQL for recent materials:', sql, 'with limit:', limitNum);
+      const [rows] = await db.promise().execute(sql);
       return rows;
     } catch (error) {
       console.error('Error in Material.getRecentMaterials:', error);

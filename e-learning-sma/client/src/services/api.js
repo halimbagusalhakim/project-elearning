@@ -132,4 +132,21 @@ export const submissionsAPI = {
   delete: (id) => api.delete(`/submissions/${id}`),
 };
 
+// Admin API
+export const adminAPI = {
+  getDashboard: () => api.get('/admin/dashboard'),
+  getAllUsers: (page = 1, limit = 10, filters = {}) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+      ...filters
+    });
+    return api.get(`/admin/users?${params.toString()}`);
+  },
+  getTeachers: () => api.get('/admin/teachers'),
+  createUser: (userData) => api.post('/admin/users', userData),
+  updateUserRole: (userId, roleData) => api.put(`/admin/users/${userId}/role`, roleData),
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+};
+
 export default api;

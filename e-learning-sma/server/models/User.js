@@ -67,6 +67,12 @@ class User {
     return rows;
   }
 
+  static async getUsersByRole(role) {
+    const sql = 'SELECT id, username, email, nama_lengkap FROM users WHERE role = ?';
+    const [rows] = await db.promise().execute(sql, [role]);
+    return rows;
+  }
+
   static async updatePassword(id, newPassword) {
     const sql = 'UPDATE users SET password = ? WHERE id = ?';
     const [result] = await db.promise().execute(sql, [newPassword, id]);
@@ -94,8 +100,8 @@ class User {
   }
 
   static async getAllWithPagination(limit = 50, offset = 0) {
-    const sql = 'SELECT id, username, email, role, nama_lengkap, kelas, created_at FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?';
-    const [rows] = await db.promise().execute(sql, [limit, offset]);
+    const sql = `SELECT id, username, email, role, nama_lengkap, kelas, created_at FROM users ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
+    const [rows] = await db.promise().execute(sql);
     return rows;
   }
 
@@ -103,6 +109,13 @@ class User {
     const sql = 'UPDATE users SET role = ? WHERE id = ?';
     const [result] = await db.promise().execute(sql, [role, id]);
     return result;
+  }
+
+  static async updateUser(id, userData) {
+    const { username, email, role, nama_lengkap, kelas } = userData;
+    const sql = 'UPDATE users SET username = ?, email = ?, role = ?, nama_lengkap = ?, kelas = ? WHERE id = ?';
+    const [result] = await db.promise().execute(sql, [username, email, role, nama_lengkap, kelas, id]);
+    return result.affectedRows > 0;
   }
 
   static async delete(id) {

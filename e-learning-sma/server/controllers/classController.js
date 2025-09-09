@@ -23,11 +23,14 @@ const getClassById = async (req, res) => {
 };
 
 const createClass = async (req, res) => {
-  const { nama_kelas, kode_kelas, deskripsi } = req.body;
+  const { nama_kelas, kode_kelas, deskripsi, guru_id } = req.body;
 
   try {
-    console.log('Creating class with data:', { nama_kelas, kode_kelas, deskripsi, guru_id: req.user.id });
-    
+    // Determine the teacher ID: use provided guru_id if admin, otherwise use current user's ID
+    const teacherId = req.user.role === 'admin' && guru_id ? guru_id : req.user.id;
+
+    console.log('Creating class with data:', { nama_kelas, kode_kelas, deskripsi, guru_id: teacherId });
+
     const existingClass = await Class.findByCode(kode_kelas);
     if (existingClass) {
       return res.status(400).json({ error: 'Class code already exists' });
@@ -36,7 +39,7 @@ const createClass = async (req, res) => {
     const classId = await Class.create({
       nama_kelas,
       kode_kelas,
-      guru_id: req.user.id,
+      guru_id: teacherId,
       deskripsi
     });
 

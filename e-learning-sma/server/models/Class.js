@@ -122,8 +122,9 @@ class Class {
   }
 
   static async getRecentClasses(limit = 5) {
-    const sql = 'SELECT * FROM classes ORDER BY created_at DESC LIMIT ?';
-    const [rows] = await db.promise().execute(sql, [limit]);
+    const limitNum = Math.floor(Number(limit));
+    const sql = `SELECT * FROM classes ORDER BY created_at DESC LIMIT ${limitNum}`;
+    const [rows] = await db.promise().execute(sql);
     return rows;
   }
 
