@@ -8,14 +8,17 @@ const {
   deleteAssignment,
   getUpcomingAssignments,
   getOverdueAssignments,
-
   getStudentAssignments,
-  getStudentClassGrades
+  getStudentClassGrades,
+  getAllAssignments
 } = require('../controllers/assignmentController');
 const { authenticateToken, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
+
+// GET /api/assignments - Get all assignments (admin only)
+router.get('/', authenticateToken, authorizeRoles('admin'), getAllAssignments);
 
 // GET /api/assignments/class/:classId - Get assignments by class
 router.get('/class/:classId', getAssignmentsByClass);
@@ -34,10 +37,6 @@ router.get('/student', authenticateToken, authorizeRoles('siswa'), getStudentAss
 
 // GET /api/assignments/student/class/:classId - Get assignments with grades for student filtered by class
 router.get('/student/class/:classId', authenticateToken, authorizeRoles('siswa'), getStudentClassGrades);
-
-
-
-
 
 // GET /api/assignments/:id - Get assignment by ID (must be last to avoid conflicts)
 router.get('/:id', getAssignmentById);

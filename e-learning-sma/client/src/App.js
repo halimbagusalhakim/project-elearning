@@ -74,10 +74,6 @@ const App = () => {
           <Route path="/tugas-saya" element={isAuthenticated() && user.role === 'siswa' ? <TugasSaya /> : <Navigate to="/" />} />
           <Route path="/laporan-nilai-tugas" element={isAuthenticated() && user.role === 'siswa' ? <LaporanNilaiTugas /> : <Navigate to="/" />} />
 
-          {/* Routes for guru */}
-          <Route path="/manajemen-materi" element={isAuthenticated() && user.role === 'guru' ? <ManajemenMateri /> : <Navigate to="/" />} />
-          <Route path="/manajemen-tugas" element={isAuthenticated() && user.role === 'guru' ? <ManajemenTugas /> : <Navigate to="/" />} />
-
           {/* Routes for admin */}
           <Route path="/admin/manajemen-pengguna" element={isAuthenticated() && user.role === 'admin' ? <AdminUserManagement /> : <Navigate to="/" />} />
 

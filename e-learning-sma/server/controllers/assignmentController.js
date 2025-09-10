@@ -187,6 +187,20 @@ const getStudentClassGrades = async (req, res) => {
   }
 };
 
+// New controller method to get all assignments (admin only)
+const getAllAssignments = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+    const assignments = await Assignment.getAll();
+    res.json(assignments);
+  } catch (error) {
+    console.error('Error fetching all assignments:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 module.exports = {
   getAssignmentsByClass,
   getAssignmentsByTeacher,
@@ -197,5 +211,7 @@ module.exports = {
   getUpcomingAssignments,
   getOverdueAssignments,
   getStudentAssignments,
-  getStudentClassGrades
+  getStudentClassGrades,
+  getAllAssignments
 };
+

@@ -6,15 +6,18 @@ const {
   updateMaterial,
   deleteMaterial,
   getRecentMaterials,
-  getStudentMaterials
+  getStudentMaterials,
+  getAllMaterials
 } = require('../controllers/materialController');
 const { authenticateToken, authorizeRoles } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 const router = express.Router();
 
-// GET /api/materials/class/:classId - Get materials by class
 router.get('/class/:classId', getMaterialsByClass);
+
+// GET /api/materials/all - Get all materials (admin only)
+router.get('/all', authenticateToken, authorizeRoles('admin'), getAllMaterials);
 
 // GET /api/materials/recent - Get recent materials
 router.get('/recent', getRecentMaterials);

@@ -1,11 +1,12 @@
 const express = require('express');
-const { 
-  getAllClasses, 
-  getClassById, 
-  createClass, 
-  updateClass, 
-  deleteClass, 
+const {
+  getAllClasses,
+  getClassById,
+  createClass,
+  updateClass,
+  deleteClass,
   getTeacherClasses,
+  getClassesByTeacherId,
   getPendingRegistrations,
   getApprovedStudents,
   approveRegistration,
@@ -23,6 +24,9 @@ router.get('/', getAllClasses);
 
 // GET /api/classes/teacher - Get teacher's classes
 router.get('/teacher', authenticateToken, authorizeRoles('guru', 'admin'), getTeacherClasses);
+
+// GET /api/classes/teacher/:teacherId - Get classes by teacher ID (admin only)
+router.get('/teacher/:teacherId', authenticateToken, authorizeRoles('admin'), getClassesByTeacherId);
 
 // GET /api/classes/:id - Get class by ID
 router.get('/:id', getClassById);

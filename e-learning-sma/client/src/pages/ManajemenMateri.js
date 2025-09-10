@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { materialsAPI, classesAPI } from '../services/api';
+import { materialsAPI, classesAPI, adminAPI } from '../services/api';
 import '../styles/dashboard.css';
 
 const ManajemenMateri = () => {
@@ -14,6 +14,7 @@ const ManajemenMateri = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createData, setCreateData] = useState({
+    created_by: '', // for admin to select teacher
     kelas_id: '',
     judul: '',
     deskripsi: '',
@@ -30,15 +31,26 @@ const ManajemenMateri = () => {
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
-  useEffect(() => {
-    if (selectedClass) {
-      setCreateData((prev) => ({ ...prev, kelas_id: selectedClass.id }));
-    }
-  }, [selectedClass]);
+  const [userRole, setUserRole] = useState('');
+  const [teachers, setTeachers] = useState([]); // Add teachers state for admin
 
   useEffect(() => {
-    fetchTeacherClasses();
+    // Get user role from localStorage or context
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.role) {
+      setUserRole(user.role);
+    }
   }, []);
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      fetchAllMaterials();
+      fetchAllClasses();
+      fetchTeachers(); // Fetch teachers for admin
+    } else {
+      fetchTeacherClasses();
+    }
+  }, [userRole]);
 
   const fetchTeacherClasses = async () => {
     try {
@@ -50,6 +62,45 @@ const ManajemenMateri = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAllMaterials = async () => {
+    try {
+      setLoading(true);
+      const response = await materialsAPI.getAll();
+      setClassMaterials(response.data);
+    } catch (err) {
+      setError('Gagal memuat materi');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllClasses = async () => {
+    try {
+      const response = await classesAPI.getAll();
+      if (response && response.data) {
+        setTeacherClasses(response.data);
+      } else {
+        console.error('Response data for classes is empty or undefined');
+      }
+    } catch (err) {
+      console.error('Gagal memuat daftar kelas:', err);
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const response = await adminAPI.getTeachers();
+      if (response && response.data && Array.isArray(response.data)) {
+        setTeachers(response.data);
+      } else {
+        console.error('Response data for teachers is empty, undefined, or not an array');
+      }
+    } catch (err) {
+      console.error('Gagal memuat daftar guru:', err);
     }
   };
 
@@ -94,14 +145,19 @@ const ManajemenMateri = () => {
       if (createData.file) {
         formData.append('file', createData.file);
       }
+      if (userRole === 'admin' && createData.created_by) {
+        formData.append('created_by', createData.created_by);
+      }
 
       await materialsAPI.create(formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       setShowCreateModal(false);
-      setCreateData({ kelas_id: '', judul: '', deskripsi: '', file: null });
-      if (selectedClass) {
+      setCreateData({ kelas_id: '', judul: '', deskripsi: '', file: null, created_by: '' });
+      if (userRole === 'admin') {
+        await fetchAllMaterials();
+      } else if (selectedClass) {
         await fetchClassMaterials(selectedClass.id);
       }
     } catch (err) {
@@ -160,7 +216,9 @@ const ManajemenMateri = () => {
 
       setShowEditModal(false);
       setEditData({ id: '', judul: '', deskripsi: '', file: null });
-      if (selectedClass) {
+      if (userRole === 'admin') {
+        await fetchAllMaterials();
+      } else if (selectedClass) {
         await fetchClassMaterials(selectedClass.id);
       }
     } catch (err) {
@@ -178,7 +236,9 @@ const ManajemenMateri = () => {
     try {
       await materialsAPI.delete(id);
       setDeleteError('');
-      if (selectedClass) {
+      if (userRole === 'admin') {
+        await fetchAllMaterials();
+      } else if (selectedClass) {
         await fetchClassMaterials(selectedClass.id);
       }
     } catch (err) {
@@ -205,112 +265,167 @@ const ManajemenMateri = () => {
       {error && <div className="error-message">{error}</div>}
       {deleteError && <div className="error-message">{deleteError}</div>}
 
+      <div className="action-bar">
+        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+          + Tambah Materi Baru
+        </button>
+      </div>
+
       <div className="content-grid">
-        {!selectedClass ? (
-          teacherClasses.length === 0 ? (
+        {userRole === 'admin' ? (
+          // Admin view - show all materials
+          loading ? (
+            <div className="loading">Memuat materi...</div>
+          ) : classMaterials.length === 0 ? (
             <div className="empty-state">
-              <h3>Belum ada kelas</h3>
-              <p>Anda belum membuat kelas apapun.</p>
+              <h3>Belum ada materi</h3>
+              <p>Belum ada materi yang dibuat.</p>
             </div>
           ) : (
             <div className="cards-grid">
-              {teacherClasses.map((classItem) => (
-                <div
-                  key={classItem.id}
-                  className="card clickable"
-                  onClick={() => handleClassClick(classItem)}
-                >
+              {classMaterials.map((material) => (
+                <div key={material.id} className="card">
                   <div className="card-header">
-                    <h3>{classItem.nama_kelas}</h3>
-                    <span className="class-code">{classItem.kode_kelas}</span>
+                    <h3>{material.judul}</h3>
+                    <span className="material-type">{material.file_type || 'Teks'}</span>
                   </div>
                   <div className="card-body">
                     <p>
-                      <strong>Kode Kelas:</strong> {classItem.kode_kelas}
+                      <strong>Kelas:</strong> {material.nama_kelas}
                     </p>
                     <p>
-                      <strong>Jumlah Siswa:</strong> {classItem.jumlah_siswa || 0} siswa
+                      <strong>Deskripsi:</strong> {material.deskripsi}
                     </p>
-                    {classItem.deskripsi && (
-                      <p>
-                        <strong>Deskripsi:</strong> {classItem.deskripsi}
-                      </p>
-                    )}
                     <p>
-                      <strong>Dibuat:</strong>{' '}
-                      {new Date(classItem.created_at).toLocaleDateString('id-ID')}
+                      <strong>Dibuat oleh:</strong> {material.created_by_name}
+                    </p>
+                    <p>
+                      <strong>Tanggal:</strong>{' '}
+                      {new Date(material.created_at).toLocaleDateString('id-ID')}
                     </p>
                   </div>
                   <div className="card-footer">
-                    <button className="btn btn-primary">Lihat Materi</button>
+                    {material.file_path ? (
+                      <a
+                        href={`http://localhost:5000${material.file_path}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                      >
+                        Download Materi
+                      </a>
+                    ) : (
+                      <span className="no-file">Tidak ada file</span>
+                    )}
+                    <button className="btn btn-primary" onClick={() => openEditModal(material)}>Edit Materi</button>
+                    <button className="btn btn-danger" onClick={() => handleDeleteMaterial(material.id)}>Hapus</button>
                   </div>
                 </div>
               ))}
             </div>
           )
         ) : (
-          <div>
-            <div className="back-button-container">
-              <button className="btn btn-secondary" onClick={handleBackToClasses}>
-                ← Kembali ke Daftar Kelas
-              </button>
-              <h2>Materi untuk {selectedClass.nama_kelas}</h2>
-            </div>
-
-            <div className="action-bar">
-              <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-                + Tambah Materi Baru
-              </button>
-            </div>
-
-            {materialsLoading ? (
-              <div className="loading">Memuat materi...</div>
-            ) : classMaterials.length === 0 ? (
+          // Teacher view - show classes first, then materials per class
+          !selectedClass ? (
+            teacherClasses.length === 0 ? (
               <div className="empty-state">
-                <h3>Belum ada materi</h3>
-                <p>Belum ada materi untuk kelas ini.</p>
+                <h3>Belum ada kelas</h3>
+                <p>Anda belum membuat kelas apapun.</p>
               </div>
             ) : (
               <div className="cards-grid">
-                {classMaterials.map((material) => (
-                  <div key={material.id} className="card">
+                {teacherClasses.map((classItem) => (
+                  <div
+                    key={classItem.id}
+                    className="card clickable"
+                    onClick={() => handleClassClick(classItem)}
+                  >
                     <div className="card-header">
-                      <h3>{material.judul}</h3>
-                      <span className="material-type">{material.file_type || 'Teks'}</span>
+                      <h3>{classItem.nama_kelas}</h3>
+                      <span className="class-code">{classItem.kode_kelas}</span>
                     </div>
                     <div className="card-body">
                       <p>
-                        <strong>Deskripsi:</strong> {material.deskripsi}
+                        <strong>Kode Kelas:</strong> {classItem.kode_kelas}
                       </p>
                       <p>
-                        <strong>Dibuat oleh:</strong> {material.created_by_name}
+                        <strong>Jumlah Siswa:</strong> {classItem.jumlah_siswa || 0} siswa
                       </p>
+                      {classItem.deskripsi && (
+                        <p>
+                          <strong>Deskripsi:</strong> {classItem.deskripsi}
+                        </p>
+                      )}
                       <p>
-                        <strong>Tanggal:</strong>{' '}
-                        {new Date(material.created_at).toLocaleDateString('id-ID')}
+                        <strong>Dibuat:</strong>{' '}
+                        {new Date(classItem.created_at).toLocaleDateString('id-ID')}
                       </p>
                     </div>
                     <div className="card-footer">
-                      {material.file_path ? (
-                        <a
-                          href={`http://localhost:5000${material.file_path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn btn-secondary"
-                        >
-                          Download Materi
-                        </a>
-                      ) : (
-                        <span className="no-file">Tidak ada file</span>
-                      )}
-                      <button className="btn btn-primary" onClick={() => openEditModal(material)}>Edit Materi</button>
-                      <button className="btn btn-danger" onClick={() => handleDeleteMaterial(material.id)}>Hapus</button>
+                      <button className="btn btn-primary">Lihat Materi</button>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            )
+          ) : (
+            <div>
+              <div className="back-button-container">
+                <button className="btn btn-secondary" onClick={handleBackToClasses}>
+                  ← Kembali ke Daftar Kelas
+                </button>
+                <h2>Materi untuk {selectedClass.nama_kelas}</h2>
+              </div>
+
+              {materialsLoading ? (
+                <div className="loading">Memuat materi...</div>
+              ) : classMaterials.length === 0 ? (
+                <div className="empty-state">
+                  <h3>Belum ada materi</h3>
+                  <p>Belum ada materi untuk kelas ini.</p>
+                </div>
+              ) : (
+                <div className="cards-grid">
+                  {classMaterials.map((material) => (
+                    <div key={material.id} className="card">
+                      <div className="card-header">
+                        <h3>{material.judul}</h3>
+                        <span className="material-type">{material.file_type || 'Teks'}</span>
+                      </div>
+                      <div className="card-body">
+                        <p>
+                          <strong>Deskripsi:</strong> {material.deskripsi}
+                        </p>
+                        <p>
+                          <strong>Dibuat oleh:</strong> {material.created_by_name}
+                        </p>
+                        <p>
+                          <strong>Tanggal:</strong>{' '}
+                          {new Date(material.created_at).toLocaleDateString('id-ID')}
+                        </p>
+                      </div>
+                      <div className="card-footer">
+                        {material.file_path ? (
+                          <a
+                            href={`http://localhost:5000${material.file_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary"
+                          >
+                            Download Materi
+                          </a>
+                        ) : (
+                          <span className="no-file">Tidak ada file</span>
+                        )}
+                        <button className="btn btn-primary" onClick={() => openEditModal(material)}>Edit Materi</button>
+                        <button className="btn btn-danger" onClick={() => handleDeleteMaterial(material.id)}>Hapus</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
         )}
       </div>
 
@@ -320,9 +435,37 @@ const ManajemenMateri = () => {
             <h2>Tambah Materi Baru</h2>
             {createError && <div className="error-message">{createError}</div>}
             <form onSubmit={handleCreateMaterial}>
-              <div className="form-group">
-                {/* Removed Pilih Kelas dropdown as kelas_id is set automatically */}
-              </div>
+            {/* Removed teacher selection UI as per user request */}
+            {userRole === 'admin' && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="kelas_id">Pilih Kelas:</label>
+                  <select
+                    id="kelas_id"
+                    name="kelas_id"
+                    value={createData.kelas_id}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Pilih Kelas</option>
+                    {teacherClasses && teacherClasses.length > 0 ? (
+                      teacherClasses.map((classItem) => (
+                        <option key={classItem.id} value={classItem.id}>
+                          {classItem.nama_kelas} ({classItem.kode_kelas})
+                        </option>
+                      ))
+                    ) : (
+                      <option disabled>Tidak ada kelas tersedia</option>
+                    )}
+                  </select>
+                </div>
+              </>
+            )}
+              {userRole !== 'admin' && selectedClass && (
+                <div className="form-group">
+                  <label>Kelas: {selectedClass.nama_kelas}</label>
+                </div>
+              )}
               <div className="form-group">
                 <label htmlFor="judul">Judul Materi:</label>
                 <input

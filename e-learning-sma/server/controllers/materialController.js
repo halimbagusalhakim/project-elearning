@@ -22,7 +22,7 @@ const getMaterialById = async (req, res) => {
 };
 
 const createMaterial = async (req, res) => {
-  const { kelas_id, judul, deskripsi } = req.body;
+  const { kelas_id, judul, deskripsi, created_by } = req.body;
 
   if (!kelas_id || isNaN(parseInt(kelas_id))) {
     return res.status(400).json({ error: 'Invalid or missing kelas_id' });
@@ -36,6 +36,9 @@ const createMaterial = async (req, res) => {
     file_type = req.file.mimetype;
   }
 
+  // For admin, allow specifying created_by, otherwise use logged-in user
+  const creatorId = (req.user.role === 'admin' && created_by) ? created_by : req.user.id;
+
   try {
     const materialId = await Material.create({
       kelas_id,
@@ -43,7 +46,7 @@ const createMaterial = async (req, res) => {
       deskripsi,
       file_path,
       file_type,
-      created_by: req.user.id
+      created_by: creatorId
     });
 
     res.status(201).json({ id: materialId, message: 'Material created successfully' });
@@ -126,6 +129,16 @@ const getStudentMaterials = async (req, res) => {
   }
 };
 
+const getAllMaterials = async (req, res) => {
+  try {
+    const materials = await Material.getAllMaterials();
+    res.json(materials);
+  } catch (error) {
+    console.error('Error fetching all materials:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 module.exports = {
   getMaterialsByClass,
   getMaterialById,
@@ -133,5 +146,6 @@ module.exports = {
   updateMaterial,
   deleteMaterial,
   getRecentMaterials,
-  getStudentMaterials
+  getStudentMaterials,
+  getAllMaterials
 };

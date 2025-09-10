@@ -112,6 +112,18 @@ class Material {
     }
   }
 
+  static async getAllMaterials() {
+    const sql = `
+      SELECT m.*, u.nama_lengkap as created_by_name, c.nama_kelas
+      FROM materials m
+      JOIN users u ON m.created_by = u.id
+      JOIN classes c ON m.kelas_id = c.id
+      ORDER BY m.created_at DESC
+    `;
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
   static async getTotalCount() {
     const sql = 'SELECT COUNT(*) as total FROM materials';
     const [rows] = await db.promise().execute(sql);

@@ -127,6 +127,40 @@ const getTeacherClasses = async (req, res) => {
   }
 };
 
+const getClassesByTeacherId = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    console.log('Fetching classes for teacher ID:', teacherId);
+    const classes = await Class.getClassesByTeacher(teacherId);
+
+    console.log('Number of classes fetched:', classes.length);
+
+    // For each class, get the count of approved students with error handling
+    const classesWithStudentCount = await Promise.all(classes.map(async (cls) => {
+      try {
+        const approvedStudents = await ClassRegistration.getApprovedStudentsByClass(cls.id);
+        return {
+          ...cls,
+          jumlah_siswa: approvedStudents.length
+        };
+      } catch (err) {
+        console.error(`Error fetching approved students for class ID ${cls.id}:`, err);
+        return {
+          ...cls,
+          jumlah_siswa: 0
+        };
+      }
+    }));
+
+    console.log('Classes fetched successfully:', classesWithStudentCount.length, 'classes found');
+    res.json(classesWithStudentCount);
+  } catch (error) {
+    console.error('Error fetching classes by teacher ID:', error);
+    console.error(error.stack);
+    res.status(500).json({ error: 'Server error: ' + error.message });
+  }
+};
+
 // Get pending registrations for a class
 const getPendingRegistrations = async (req, res) => {
   try {
@@ -332,6 +366,7 @@ module.exports = {
   updateClass,
   deleteClass,
   getTeacherClasses,
+  getClassesByTeacherId,
   getPendingRegistrations,
   getApprovedStudents,
   approveRegistration,

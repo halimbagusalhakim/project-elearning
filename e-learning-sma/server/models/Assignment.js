@@ -60,6 +60,27 @@ class Assignment {
     return rows;
   }
 
+  static async getAll() {
+    const sql = `
+      SELECT
+        a.*,
+        u.nama_lengkap as created_by_name,
+        c.nama_kelas,
+        c.kode_kelas,
+        COUNT(DISTINCT s.id) as jumlah_submission,
+        COUNT(DISTINCT cr.siswa_id) as jumlah_siswa
+      FROM assignments a
+      JOIN users u ON a.created_by = u.id
+      JOIN classes c ON a.kelas_id = c.id
+      LEFT JOIN class_registrations cr ON c.id = cr.kelas_id AND cr.status = 'approved'
+      LEFT JOIN submissions s ON a.id = s.assignment_id
+      GROUP BY a.id, u.nama_lengkap, c.nama_kelas, c.kode_kelas
+      ORDER BY a.created_at DESC
+    `;
+    const [rows] = await db.promise().execute(sql);
+    return rows;
+  }
+
   static async findById(id) {
     const sql = `
       SELECT a.*, u.nama_lengkap as created_by_name, c.nama_kelas

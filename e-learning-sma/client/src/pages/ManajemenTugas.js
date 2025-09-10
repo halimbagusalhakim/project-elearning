@@ -37,15 +37,31 @@ const ManajemenTugas = () => {
   const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
 
+  const [userRole, setUserRole] = useState('');
+
+  useEffect(() => {
+    // Get user role from localStorage or context
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.role) {
+      setUserRole(user.role);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userRole === 'admin') {
+      console.log('User role is admin, fetching all classes and assignments');  // Debug log
+      fetchAllAssignments();
+      fetchAllClasses();
+    } else {
+      fetchTeacherClasses();
+    }
+  }, [userRole]);
+
   useEffect(() => {
     if (selectedClass) {
       setCreateData((prev) => ({ ...prev, kelas_id: selectedClass.id }));
     }
   }, [selectedClass]);
-
-  useEffect(() => {
-    fetchTeacherClasses();
-  }, []);
 
   const fetchTeacherClasses = async () => {
     try {
@@ -55,6 +71,52 @@ const ManajemenTugas = () => {
     } catch (err) {
       setError('Gagal memuat kelas');
       console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllClasses = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching all classes for admin...');
+      const response = await classesAPI.getAll();
+      console.log('Fetched classes response:', response);
+      console.log('Fetched classes data:', response.data);
+
+      // Ensure we have an array
+      const classes = Array.isArray(response.data) ? response.data : [];
+      setTeacherClasses(classes);
+      console.log('Classes set in state:', classes);
+
+      // Also set the first class as default if available
+      if (classes.length > 0) {
+        setCreateData(prev => ({ ...prev, kelas_id: classes[0].id.toString() }));
+      }
+    } catch (err) {
+      console.error('Error fetching classes:', err);
+      console.error('Error response:', err.response);
+      console.error('Error message:', err.message);
+      setError('Gagal memuat kelas: ' + (err.response?.data?.error || err.message));
+      setTeacherClasses([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllAssignments = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching all assignments for admin...');
+      const response = await assignmentsAPI.getAll();
+      console.log('Fetched assignments response:', response);
+      console.log('Fetched assignments data:', response.data);
+      setClassAssignments(response.data);
+    } catch (err) {
+      console.error('Error fetching assignments:', err);
+      console.error('Error response:', err.response);
+      console.error('Error message:', err.message);
+      setError('Gagal memuat tugas: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }
@@ -103,7 +165,9 @@ const ManajemenTugas = () => {
 
       setShowCreateModal(false);
       setCreateData({ kelas_id: '', judul: '', deskripsi: '', deadline: '', file: null });
-      if (selectedClass) {
+      if (userRole === 'admin') {
+        await fetchAllAssignments();
+      } else if (selectedClass) {
         await fetchClassAssignments(selectedClass.id);
       }
     } catch (err) {
@@ -164,7 +228,9 @@ const ManajemenTugas = () => {
 
       setShowEditModal(false);
       setEditData({ id: '', judul: '', deskripsi: '', deadline: '', file: null });
-      if (selectedClass) {
+      if (userRole === 'admin') {
+        await fetchAllAssignments();
+      } else if (selectedClass) {
         await fetchClassAssignments(selectedClass.id);
       }
     } catch (err) {
@@ -182,7 +248,9 @@ const ManajemenTugas = () => {
     try {
       await assignmentsAPI.delete(id);
       setDeleteError('');
-      if (selectedClass) {
+      if (userRole === 'admin') {
+        await fetchAllAssignments();
+      } else if (selectedClass) {
         await fetchClassAssignments(selectedClass.id);
       }
     } catch (err) {
@@ -229,69 +297,20 @@ const ManajemenTugas = () => {
       {deleteError && <div className="error-message">{deleteError}</div>}
 
       <div className="content-grid">
-        {!selectedClass ? (
-          teacherClasses.length === 0 ? (
-            <div className="empty-state">
-              <h3>Belum ada kelas</h3>
-              <p>Anda belum membuat kelas apapun.</p>
-            </div>
-          ) : (
-            <div className="cards-grid">
-              {teacherClasses.map((classItem) => (
-                <div
-                  key={classItem.id}
-                  className="card clickable"
-                  onClick={() => handleClassClick(classItem)}
-                >
-                  <div className="card-header">
-                    <h3>{classItem.nama_kelas}</h3>
-                    <span className="class-code">{classItem.kode_kelas}</span>
-                  </div>
-                  <div className="card-body">
-                    <p>
-                      <strong>Kode Kelas:</strong> {classItem.kode_kelas}
-                    </p>
-                    <p>
-                      <strong>Jumlah Siswa:</strong> {classItem.jumlah_siswa || 0} siswa
-                    </p>
-                    {classItem.deskripsi && (
-                      <p>
-                        <strong>Deskripsi:</strong> {classItem.deskripsi}
-                      </p>
-                    )}
-                    <p>
-                      <strong>Dibuat:</strong>{' '}
-                      {new Date(classItem.created_at).toLocaleDateString('id-ID')}
-                    </p>
-                  </div>
-                  <div className="card-footer">
-                    <button className="btn btn-primary">Lihat Tugas</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        ) : (
+        {userRole === 'admin' ? (
           <div>
-            <div className="back-button-container">
-              <button className="btn btn-secondary" onClick={handleBackToClasses}>
-                ← Kembali ke Daftar Kelas
-              </button>
-              <h2>Tugas untuk {selectedClass.nama_kelas}</h2>
-            </div>
-
             <div className="action-bar">
               <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
                 + Tambah Tugas Baru
               </button>
             </div>
 
-            {assignmentsLoading ? (
+            {loading ? (
               <div className="loading">Memuat tugas...</div>
             ) : classAssignments.length === 0 ? (
               <div className="empty-state">
                 <h3>Belum ada tugas</h3>
-                <p>Belum ada tugas untuk kelas ini.</p>
+                <p>Belum ada tugas di sistem.</p>
               </div>
             ) : (
               <div className="cards-grid">
@@ -308,6 +327,9 @@ const ManajemenTugas = () => {
                         </span>
                       </div>
                       <div className="card-body">
+                        <p>
+                          <strong>Kelas:</strong> {assignment.nama_kelas} ({assignment.kode_kelas})
+                        </p>
                         <p>
                           <strong>Deadline:</strong>{' '}
                           {new Date(assignment.deadline).toLocaleString('id-ID')}
@@ -352,6 +374,131 @@ const ManajemenTugas = () => {
               </div>
             )}
           </div>
+        ) : (
+          !selectedClass ? (
+            teacherClasses.length === 0 ? (
+              <div className="empty-state">
+                <h3>Belum ada kelas</h3>
+                <p>Anda belum membuat kelas apapun.</p>
+              </div>
+            ) : (
+              <div className="cards-grid">
+                {teacherClasses.map((classItem) => (
+                  <div
+                    key={classItem.id}
+                    className="card clickable"
+                    onClick={() => handleClassClick(classItem)}
+                  >
+                    <div className="card-header">
+                      <h3>{classItem.nama_kelas}</h3>
+                      <span className="class-code">{classItem.kode_kelas}</span>
+                    </div>
+                    <div className="card-body">
+                      <p>
+                        <strong>Kode Kelas:</strong> {classItem.kode_kelas}
+                      </p>
+                      <p>
+                        <strong>Jumlah Siswa:</strong> {classItem.jumlah_siswa || 0} siswa
+                      </p>
+                      {classItem.deskripsi && (
+                        <p>
+                          <strong>Deskripsi:</strong> {classItem.deskripsi}
+                        </p>
+                      )}
+                      <p>
+                        <strong>Dibuat:</strong>{' '}
+                        {new Date(classItem.created_at).toLocaleDateString('id-ID')}
+                      </p>
+                    </div>
+                    <div className="card-footer">
+                      <button className="btn btn-primary">Lihat Tugas</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : (
+            <div>
+              <div className="back-button-container">
+                <button className="btn btn-secondary" onClick={handleBackToClasses}>
+                  ← Kembali ke Daftar Kelas
+                </button>
+                <h2>Tugas untuk {selectedClass.nama_kelas}</h2>
+              </div>
+
+              <div className="action-bar">
+                <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+                  + Tambah Tugas Baru
+                </button>
+              </div>
+
+              {assignmentsLoading ? (
+                <div className="loading">Memuat tugas...</div>
+              ) : classAssignments.length === 0 ? (
+                <div className="empty-state">
+                  <h3>Belum ada tugas</h3>
+                  <p>Belum ada tugas untuk kelas ini.</p>
+                </div>
+              ) : (
+                <div className="cards-grid">
+                  {classAssignments.map((assignment) => {
+                    const stats = getSubmissionStats(assignment);
+                    const isOverdue = new Date() > new Date(assignment.deadline);
+
+                    return (
+                      <div key={assignment.id} className="card">
+                        <div className="card-header">
+                          <h3>{assignment.judul}</h3>
+                          <span className={`status-badge ${isOverdue ? 'overdue' : 'active'}`}>
+                            {isOverdue ? 'Selesai' : 'Aktif'}
+                          </span>
+                        </div>
+                        <div className="card-body">
+                          <p>
+                            <strong>Deadline:</strong>{' '}
+                            {new Date(assignment.deadline).toLocaleString('id-ID')}
+                          </p>
+                          <p>
+                            <strong>Deskripsi:</strong> {assignment.deskripsi}
+                          </p>
+                          <div className="progress-section">
+                            <p><strong>Pengumpulan:</strong> {stats.submitted}/{stats.totalStudents} siswa ({stats.percentage}%)</p>
+                            <div className="progress-bar">
+                              <div
+                                className="progress-fill"
+                                style={{ width: `${stats.percentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="card-footer">
+                          {assignment.file_path && (
+                            <a
+                              href={`http://localhost:5000${assignment.file_path}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-secondary"
+                            >
+                              Lihat Soal
+                            </a>
+                          )}
+                          <button className="btn btn-primary" onClick={() => handleViewSubmissions(assignment)}>
+                            Lihat Pengumpulan
+                          </button>
+                          <button className="btn btn-primary" onClick={() => openEditModal(assignment)}>
+                            Edit Tugas
+                          </button>
+                          <button className="btn btn-danger" onClick={() => handleDeleteAssignment(assignment.id)}>
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )
         )}
       </div>
 
@@ -361,50 +508,68 @@ const ManajemenTugas = () => {
             <h2>Tambah Tugas Baru</h2>
             {createError && <div className="error-message">{createError}</div>}
             <form onSubmit={handleCreateAssignment}>
-              <div className="form-group">
-                {/* Removed Pilih Kelas dropdown as kelas_id is set automatically */}
-              </div>
-              <div className="form-group">
-                <label htmlFor="judul">Judul Tugas:</label>
-                <input
-                  type="text"
-                  id="judul"
-                  name="judul"
-                  value={createData.judul}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="deskripsi">Deskripsi:</label>
-                <textarea
-                  id="deskripsi"
-                  name="deskripsi"
-                  value={createData.deskripsi}
-                  onChange={handleInputChange}
-                  rows="3"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="deadline">Deadline:</label>
-                <input
-                  type="datetime-local"
-                  id="deadline"
-                  name="deadline"
-                  value={createData.deadline}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="file">Upload File:</label>
-                <input
-                  type="file"
-                  id="file"
-                  name="file"
-                  onChange={handleInputChange}
-                />
-              </div>
+            <div className="form-group">
+              <label htmlFor="kelas_id">Pilih Kelas:</label>
+              <select
+                id="kelas_id"
+                name="kelas_id"
+                value={createData.kelas_id}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Pilih Kelas</option>
+                {teacherClasses && teacherClasses.length > 0 ? (
+                  teacherClasses.map((classItem) => (
+                    <option key={classItem.id} value={classItem.id}>
+                      {classItem.nama_kelas} ({classItem.kode_kelas})
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Tidak ada kelas tersedia</option>
+                )}
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="judul">Judul Tugas:</label>
+              <input
+                type="text"
+                id="judul"
+                name="judul"
+                value={createData.judul}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="deskripsi">Deskripsi:</label>
+              <textarea
+                id="deskripsi"
+                name="deskripsi"
+                value={createData.deskripsi}
+                onChange={handleInputChange}
+                rows="3"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="deadline">Deadline:</label>
+              <input
+                type="datetime-local"
+                id="deadline"
+                name="deadline"
+                value={createData.deadline}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="file">Upload File:</label>
+              <input
+                type="file"
+                id="file"
+                name="file"
+                onChange={handleInputChange}
+              />
+            </div>
               <div className="modal-actions">
                 <button
                   type="button"

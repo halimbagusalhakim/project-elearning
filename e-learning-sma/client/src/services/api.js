@@ -79,6 +79,7 @@ export const classesAPI = {
   update: (id, classData) => api.put(`/classes/${id}`, classData),
   delete: (id) => api.delete(`/classes/${id}`),
   getTeacherClasses: () => api.get('/classes/teacher'),
+  getByTeacher: (teacherId) => api.get(`/classes/teacher/${teacherId}`),
 
   // Student registration
   registerForClass: (kode_kelas) => api.post('/classes/register', { kode_kelas }),
@@ -95,6 +96,7 @@ export const classesAPI = {
 // Materials API
 export const materialsAPI = {
   getByClass: (classId) => api.get(`/materials/class/${classId}`),
+  getAll: () => api.get('/materials/all'),
   getById: (id) => api.get(`/materials/${id}`),
   create: (materialData) => api.post('/materials', materialData),
   update: (id, materialData) => api.put(`/materials/${id}`, materialData),
@@ -114,6 +116,8 @@ export const assignmentsAPI = {
   getOverdue: () => api.get('/assignments/overdue'),
   getTeacherAssignments: () => api.get('/assignments/teacher'),
 
+  // Get all assignments (admin only)
+  getAll: () => api.get('/assignments'),
 
   // Student-specific endpoints
   getStudentAssignments: () => api.get('/assignments/student'),
