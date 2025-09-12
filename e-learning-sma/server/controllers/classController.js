@@ -60,7 +60,8 @@ const updateClass = async (req, res) => {
       return res.status(404).json({ error: 'Class not found' });
     }
 
-    if (existingClass.guru_id !== req.user.id && req.user.role !== 'admin') {
+    // Allow admin to update any class, skip guru_id check for admin
+    if (req.user.role !== 'admin' && existingClass.guru_id !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized to update this class' });
     }
 

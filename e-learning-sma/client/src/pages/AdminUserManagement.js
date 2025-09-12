@@ -18,15 +18,13 @@ const AdminUserManagement = () => {
     email: '',
     password: '',
     role: 'siswa',
-    nama_lengkap: '',
-    kelas: ''
+    nama_lengkap: ''
   });
   const [editData, setEditData] = useState({
     username: '',
     email: '',
     role: 'siswa',
-    nama_lengkap: '',
-    kelas: ''
+    nama_lengkap: ''
   });
   const [createLoading, setCreateLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -79,8 +77,7 @@ const AdminUserManagement = () => {
         email: '',
         password: '',
         role: 'siswa',
-        nama_lengkap: '',
-        kelas: ''
+        nama_lengkap: ''
       });
       fetchUsers(page);
     } catch (error) {
@@ -101,8 +98,7 @@ const AdminUserManagement = () => {
       username: user.username,
       email: user.email,
       role: user.role,
-      nama_lengkap: user.nama_lengkap,
-      kelas: user.kelas || ''
+      nama_lengkap: user.nama_lengkap
     });
     setShowEditModal(true);
   };
@@ -120,8 +116,7 @@ const AdminUserManagement = () => {
         username: '',
         email: '',
         role: 'siswa',
-        nama_lengkap: '',
-        kelas: ''
+        nama_lengkap: ''
       });
       fetchUsers(page);
     } catch (error) {
@@ -256,9 +251,6 @@ const AdminUserManagement = () => {
                 <div className="card-body">
                   <p><strong>Username:</strong> {user.username}</p>
                   <p><strong>Email:</strong> {user.email}</p>
-                  {user.role === 'siswa' && user.kelas && (
-                    <p><strong>Kelas:</strong> {user.kelas}</p>
-                  )}
                   <p><strong>Dibuat:</strong> {new Date(user.created_at).toLocaleDateString('id-ID')}</p>
                 </div>
                 <div className="card-footer">
@@ -367,21 +359,9 @@ const AdminUserManagement = () => {
                 >
                   <option value="siswa">Siswa</option>
                   <option value="guru">Guru</option>
+                  <option value="admin">Admin</option>
                 </select>
               </div>
-              {createData.role === 'siswa' && (
-                <div className="form-group">
-                  <label htmlFor="kelas">Kelas (opsional):</label>
-                  <input
-                    type="text"
-                    id="kelas"
-                    name="kelas"
-                    value={createData.kelas}
-                    onChange={handleInputChange}
-                    placeholder="Contoh: X IPA 1"
-                  />
-                </div>
-              )}
               <div className="modal-actions">
                 <button
                   type="button"
@@ -460,19 +440,6 @@ const AdminUserManagement = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              {editData.role === 'siswa' && (
-                <div className="form-group">
-                  <label htmlFor="edit_kelas">Kelas (opsional):</label>
-                  <input
-                    type="text"
-                    id="edit_kelas"
-                    name="kelas"
-                    value={editData.kelas}
-                    onChange={handleEditInputChange}
-                    placeholder="Contoh: X IPA 1"
-                  />
-                </div>
-              )}
               <div className="modal-actions">
                 <button
                   type="button"

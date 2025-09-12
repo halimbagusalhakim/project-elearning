@@ -14,6 +14,7 @@ const api = axios.create({
   // headers: {
   //   'Content-Type': 'application/json',
   // },
+  // withCredentials: true, // Removed this line as it caused data loading failures
 });
 
 // Add token to requests

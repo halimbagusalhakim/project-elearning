@@ -64,6 +64,12 @@ const updateMaterial = async (req, res) => {
     file_type = req.file.mimetype;
   }
 
+  // Sanitize undefined values to null to avoid SQL bind error
+  judul = judul === undefined ? null : judul;
+  deskripsi = deskripsi === undefined ? null : deskripsi;
+  file_path = file_path === undefined ? null : file_path;
+  file_type = file_type === undefined ? null : file_type;
+
   try {
     const existingMaterial = await Material.findById(req.params.id);
     if (!existingMaterial) {
@@ -83,7 +89,8 @@ const updateMaterial = async (req, res) => {
 
     res.json({ message: 'Material updated successfully', affectedRows });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error updating material:', error);
+    res.status(500).json({ error: 'Server error: ' + error.message });
   }
 };
 

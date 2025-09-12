@@ -56,7 +56,18 @@ const ManajemenMateri = () => {
     try {
       setLoading(true);
       const response = await classesAPI.getTeacherClasses();
-      setTeacherClasses(response.data);
+      if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        setTeacherClasses(response.data);
+      } else {
+        // Fallback: if teacher has no classes, fetch all classes
+        console.warn('Teacher has no classes assigned, fetching all classes as fallback');
+        const allClassesResponse = await classesAPI.getAll();
+        if (allClassesResponse && allClassesResponse.data && Array.isArray(allClassesResponse.data)) {
+          setTeacherClasses(allClassesResponse.data);
+        } else {
+          setTeacherClasses([]);
+        }
+      }
     } catch (err) {
       setError('Gagal memuat kelas');
       console.error(err);
@@ -80,11 +91,14 @@ const ManajemenMateri = () => {
 
   const fetchAllClasses = async () => {
     try {
+      console.log('Fetching all classes...');
       const response = await classesAPI.getAll();
-      if (response && response.data) {
+      console.log('Classes API response:', response);
+      if (response && response.data && Array.isArray(response.data)) {
         setTeacherClasses(response.data);
+        console.log('Classes set in state:', response.data);
       } else {
-        console.error('Response data for classes is empty or undefined');
+        console.error('Response data for classes is empty, undefined, or not an array');
       }
     } catch (err) {
       console.error('Gagal memuat daftar kelas:', err);

@@ -112,7 +112,7 @@ class User {
   }
 
   static async updateUser(id, userData) {
-    const { username, email, role, nama_lengkap, kelas } = userData;
+    const { username, email, role, nama_lengkap, kelas = null } = userData;
     const sql = 'UPDATE users SET username = ?, email = ?, role = ?, nama_lengkap = ?, kelas = ? WHERE id = ?';
     const [result] = await db.promise().execute(sql, [username, email, role, nama_lengkap, kelas, id]);
     return result.affectedRows > 0;

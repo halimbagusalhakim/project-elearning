@@ -131,7 +131,7 @@ const ManajemenKelas = () => {
       setShowEditModal(false);
       setSelectedClass(null);
       setEditData({ nama_kelas: '', kode_kelas: '', deskripsi: '' });
-      fetchTeacherClasses();
+      fetchClasses();
     } catch (error) {
       console.error('Error updating class:', error);
       if (error.response?.data?.error) {
@@ -149,16 +149,16 @@ const ManajemenKelas = () => {
 
     try {
       await classesAPI.delete(selectedClass.id);
-      setShowDeleteConfirm(false);
-      setSelectedClass(null);
-      fetchTeacherClasses();
-    } catch (error) {
-      console.error('Error deleting class:', error);
-      alert('Gagal menghapus kelas');
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
+    setShowDeleteConfirm(false);
+    setSelectedClass(null);
+    fetchClasses();
+  } catch (error) {
+    console.error('Error deleting class:', error);
+    alert('Gagal menghapus kelas');
+  } finally {
+    setDeleteLoading(false);
+  }
+};
 
   const handleApproveRegistration = async (registrationId) => {
     try {
@@ -166,7 +166,7 @@ const ManajemenKelas = () => {
       // Refresh data
       await fetchPendingRegistrations(selectedClass.id);
       await fetchApprovedStudents(selectedClass.id);
-      fetchTeacherClasses(); // Refresh class list to update student count
+      fetchClasses(); // Refresh class list to update student count
     } catch (error) {
       console.error('Error approving registration:', error);
       alert('Gagal menyetujui pendaftaran');
@@ -192,7 +192,7 @@ const ManajemenKelas = () => {
       await classesAPI.removeStudent(registrationId);
       // Refresh data
       await fetchApprovedStudents(selectedClass.id);
-      fetchTeacherClasses(); // Refresh class list to update student count
+      fetchClasses(); // Refresh class list to update student count
       alert('Siswa berhasil dihapus dari kelas');
     } catch (error) {
       console.error('Error removing student:', error);

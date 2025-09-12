@@ -5,6 +5,7 @@ import LihatPengumpulan from './LihatPengumpulan';
 
 const ManajemenTugas = () => {
   const [teacherClasses, setTeacherClasses] = useState([]);
+  const [adminClasses, setAdminClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [classAssignments, setClassAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,8 +43,12 @@ const ManajemenTugas = () => {
   useEffect(() => {
     // Get user role from localStorage or context
     const user = JSON.parse(localStorage.getItem('user'));
+    console.log('User from localStorage:', user);
     if (user && user.role) {
+      console.log('Setting user role to:', user.role);
       setUserRole(user.role);
+    } else {
+      console.log('No user or role found in localStorage');
     }
   }, []);
 
@@ -56,6 +61,8 @@ const ManajemenTugas = () => {
       fetchTeacherClasses();
     }
   }, [userRole]);
+
+  // Removed duplicate fetchAllClasses function to fix redeclaration error
 
   useEffect(() => {
     if (selectedClass) {
@@ -84,13 +91,23 @@ const ManajemenTugas = () => {
       console.log('Fetched classes response:', response);
       console.log('Fetched classes data:', response.data);
 
-      // Ensure we have an array
-      const classes = Array.isArray(response.data) ? response.data : [];
-      setTeacherClasses(classes);
-      console.log('Classes set in state:', classes);
+      // Normalize data: map to include id as string for select value compatibility
+      const classes = Array.isArray(response.data)
+        ? response.data.map(cls => {
+            console.log('Class id type:', typeof cls.id, 'value:', cls.id);
+            return {
+              ...cls,
+              id: cls.id.toString(),
+            };
+          })
+        : [];
+
+      setAdminClasses(classes);
+      console.log('Admin classes set in state:', classes);
 
       // Also set the first class as default if available
       if (classes.length > 0) {
+        console.log('Setting createData.kelas_id to:', classes[0].id.toString());
         setCreateData(prev => ({ ...prev, kelas_id: classes[0].id.toString() }));
       }
     } catch (err) {
@@ -98,7 +115,7 @@ const ManajemenTugas = () => {
       console.error('Error response:', err.response);
       console.error('Error message:', err.message);
       setError('Gagal memuat kelas: ' + (err.response?.data?.error || err.message));
-      setTeacherClasses([]); // Set empty array on error
+      setAdminClasses([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -502,90 +519,107 @@ const ManajemenTugas = () => {
         )}
       </div>
 
-      {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Tambah Tugas Baru</h2>
-            {createError && <div className="error-message">{createError}</div>}
-            <form onSubmit={handleCreateAssignment}>
-            <div className="form-group">
-              <label htmlFor="kelas_id">Pilih Kelas:</label>
-              <select
-                id="kelas_id"
-                name="kelas_id"
-                value={createData.kelas_id}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Pilih Kelas</option>
-                {teacherClasses && teacherClasses.length > 0 ? (
-                  teacherClasses.map((classItem) => (
-                    <option key={classItem.id} value={classItem.id}>
-                      {classItem.nama_kelas} ({classItem.kode_kelas})
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Tidak ada kelas tersedia</option>
-                )}
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="judul">Judul Tugas:</label>
-              <input
-                type="text"
-                id="judul"
-                name="judul"
-                value={createData.judul}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="deskripsi">Deskripsi:</label>
-              <textarea
-                id="deskripsi"
-                name="deskripsi"
-                value={createData.deskripsi}
-                onChange={handleInputChange}
-                rows="3"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="deadline">Deadline:</label>
-              <input
-                type="datetime-local"
-                id="deadline"
-                name="deadline"
-                value={createData.deadline}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="file">Upload File:</label>
-              <input
-                type="file"
-                id="file"
-                name="file"
-                onChange={handleInputChange}
-              />
-            </div>
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Batal
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={createLoading}>
-                  {createLoading ? 'Menyimpan...' : 'Simpan'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            {showCreateModal && (
+              <>
+                <div className="modal-overlay">
+                  <div className="modal">
+                    <h2>Tambah Tugas Baru</h2>
+                    {createError && <div className="error-message">{createError}</div>}
+                    <form onSubmit={handleCreateAssignment}>
+                    <div className="form-group">
+                      <label htmlFor="kelas_id">Pilih Kelas:</label>
+                      <select
+                        id="kelas_id"
+                        name="kelas_id"
+                        value={createData.kelas_id || ''}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Pilih Kelas</option>
+                        {userRole === 'admin' ? (
+                          Array.isArray(adminClasses) && adminClasses.length > 0 ? (
+                            adminClasses.map((classItem) => {
+                              console.log('Rendering admin class option:', classItem);
+                              return (
+                                <option key={classItem.id} value={classItem.id}>
+                                  {classItem.nama_kelas} ({classItem.kode_kelas})
+                                </option>
+                              );
+                            })
+                          ) : (
+                            <option disabled>Tidak ada kelas tersedia</option>
+                          )
+                        ) : (
+                          Array.isArray(teacherClasses) && teacherClasses.length > 0 ? (
+                            teacherClasses.map((classItem) => (
+                              <option key={classItem.id} value={classItem.id}>
+                                {classItem.nama_kelas} ({classItem.kode_kelas})
+                              </option>
+                            ))
+                          ) : (
+                            <option disabled>Tidak ada kelas tersedia</option>
+                          )
+                        )}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="judul">Judul Tugas:</label>
+                      <input
+                        type="text"
+                        id="judul"
+                        name="judul"
+                        value={createData.judul}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="deskripsi">Deskripsi:</label>
+                      <textarea
+                        id="deskripsi"
+                        name="deskripsi"
+                        value={createData.deskripsi}
+                        onChange={handleInputChange}
+                        rows="3"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="deadline">Deadline:</label>
+                      <input
+                        type="datetime-local"
+                        id="deadline"
+                        name="deadline"
+                        value={createData.deadline}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="file">Upload File:</label>
+                      <input
+                        type="file"
+                        id="file"
+                        name="file"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                      <div className="modal-actions">
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setShowCreateModal(false)}
+                        >
+                          Batal
+                        </button>
+                        <button type="submit" className="btn btn-primary" disabled={createLoading}>
+                          {createLoading ? 'Menyimpan...' : 'Simpan'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </>
+            )}
 
       {showEditModal && (
         <div className="modal-overlay">

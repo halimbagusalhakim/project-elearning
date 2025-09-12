@@ -136,7 +136,7 @@ const updateUserRole = async (req, res) => {
 // Update user (full user data)
 const updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { username, email, role, nama_lengkap, kelas } = req.body;
+  const { username, email, role, nama_lengkap, kelas = null } = req.body;
 
   // Validate required fields
   if (!username || !email || !role || !nama_lengkap) {

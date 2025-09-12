@@ -1,44 +1,21 @@
-# TODO: Update ManajemenTugas.js - Class Selection Flow
+# TODO: Fix Admin Class Dropdown in "Tambah Tugas Baru" Modal
 
-## Overview
-Update ManajemenTugas.js to follow the same pattern as ManajemenMateri.js where teachers must select a class first before being able to create assignments.
+## Issue
+- When admin tries to create a new assignment, the class dropdown shows "Tidak ada kelas tersedia".
+- The frontend state `teacherClasses` is used for both teacher and admin, which is confusing.
+- Admin classes are fetched via `fetchAllClasses()` but may not be set or rendered properly.
 
-## Current State
-- ManajemenTugas.js shows a modal for creating assignments with a class selection dropdown
-- The "Buat Tugas Baru" button is always enabled
-- Class selection is done inside the modal
+## Plan
+1. Rename `teacherClasses` state to `availableClasses` or separate states for admin and teacher classes.
+2. Ensure `fetchAllClasses()` sets the correct state for admin.
+3. Update the dropdown in the modal to use the correct state based on user role.
+4. Add loading and error handling for class fetching.
+5. Test the dropdown for admin and teacher roles to confirm classes appear correctly.
 
-## Target State
-- Show list of teacher's classes first
-- When a class is clicked, show assignments for that class
-- Only then show the "Buat Tugas Baru" button
-- kelas_id is automatically set from selectedClass.id
+## Dependent Files
+- `client/src/pages/ManajemenTugas.js`
 
-## Implementation Steps
-- [x] Create TODO file with implementation plan
-- [x] Add state for teacherClasses, selectedClass, classAssignments
-- [x] Add useEffect to fetch teacher classes on component mount
-- [x] Add function to fetch assignments by class
-- [x] Add handleClassClick function to select class and fetch assignments
-- [x] Add handleBackToClasses function to return to class list
-- [x] Update useEffect to set kelas_id when selectedClass changes
-- [x] Update render logic to show class list first, then assignments
-- [x] Remove class selection dropdown from modal
-- [x] Update modal to use selectedClass.id for kelas_id
-- [x] Test the flow: select class -> view assignments -> create new assignment
-
-## Status: COMPLETED ✅
-The ManajemenTugas.js file has already been updated to follow the same pattern as ManajemenMateri.js. Teachers must now:
-1. Select a class from the list first
-2. View assignments for that class
-3. Only then can create new assignments (kelas_id is automatically set)
-
-## Files to Modify
-- e-learning-sma/client/src/pages/ManajemenTugas.js
-
-## Dependencies
-- classesAPI.getTeacherClasses()
-- assignmentsAPI.getByClass(classId)
-- assignmentsAPI.create()
-- assignmentsAPI.update()
-- assignmentsAPI.delete()
+## Follow-up
+- Implement the above changes.
+- Test UI and API integration.
+- Fix any related bugs or UI issues.
