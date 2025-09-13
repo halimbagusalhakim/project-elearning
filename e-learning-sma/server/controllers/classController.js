@@ -1,26 +1,30 @@
+
 const Class = require('../models/Class');
 const ClassRegistration = require('../models/ClassRegistration');
+const { sendSuccess, sendError } = require('../utils/responseHelper');
 
 const getAllClasses = async (req, res) => {
   try {
     const classes = await Class.getAll();
-    res.json(classes);
+    return sendSuccess(res, 'Classes fetched successfully', classes);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    return sendError(res, 'Server error');
   }
 };
+
 
 const getClassById = async (req, res) => {
   try {
     const classData = await Class.findById(req.params.id);
     if (!classData) {
-      return res.status(404).json({ error: 'Class not found' });
+      return sendError(res, 'Class not found', 404);
     }
-    res.json(classData);
+    return sendSuccess(res, 'Class fetched successfully', classData);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    return sendError(res, 'Server error');
   }
 };
+
 
 const createClass = async (req, res) => {
   const { nama_kelas, kode_kelas, deskripsi, guru_id } = req.body;
@@ -33,7 +37,7 @@ const createClass = async (req, res) => {
 
     const existingClass = await Class.findByCode(kode_kelas);
     if (existingClass) {
-      return res.status(400).json({ error: 'Class code already exists' });
+      return sendError(res, 'Class code already exists', 400);
     }
 
     const classId = await Class.create({
@@ -44,12 +48,13 @@ const createClass = async (req, res) => {
     });
 
     console.log('Class created successfully with ID:', classId);
-    res.status(201).json({ id: classId, message: 'Class created successfully' });
+    return sendSuccess(res, 'Class created successfully', { id: classId }, 201);
   } catch (error) {
     console.error('Error creating class:', error);
-    res.status(500).json({ error: 'Server error: ' + error.message });
+    return sendError(res, 'Server error: ' + error.message);
   }
 };
+
 
 const updateClass = async (req, res) => {
   const { nama_kelas, kode_kelas, deskripsi } = req.body;
@@ -57,12 +62,12 @@ const updateClass = async (req, res) => {
   try {
     const existingClass = await Class.findById(req.params.id);
     if (!existingClass) {
-      return res.status(404).json({ error: 'Class not found' });
+      return sendError(res, 'Class not found', 404);
     }
 
     // Allow admin to update any class, skip guru_id check for admin
     if (req.user.role !== 'admin' && existingClass.guru_id !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to update this class' });
+      return sendError(res, 'Not authorized to update this class', 403);
     }
 
     const affectedRows = await Class.update(req.params.id, {
@@ -71,27 +76,28 @@ const updateClass = async (req, res) => {
       deskripsi
     });
 
-    res.json({ message: 'Class updated successfully', affectedRows });
+    return sendSuccess(res, 'Class updated successfully', { affectedRows });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    return sendError(res, 'Server error');
   }
 };
+
 
 const deleteClass = async (req, res) => {
   try {
     const existingClass = await Class.findById(req.params.id);
     if (!existingClass) {
-      return res.status(404).json({ error: 'Class not found' });
+      return sendError(res, 'Class not found', 404);
     }
 
     if (existingClass.guru_id !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Not authorized to delete this class' });
+      return sendError(res, 'Not authorized to delete this class', 403);
     }
 
     const affectedRows = await Class.delete(req.params.id);
-    res.json({ message: 'Class deleted successfully', affectedRows });
+    return sendSuccess(res, 'Class deleted successfully', { affectedRows });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    return sendError(res, 'Server error');
   }
 };
 

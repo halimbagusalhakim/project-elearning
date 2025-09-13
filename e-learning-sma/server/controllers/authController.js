@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const logger = require('../utils/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -20,8 +21,10 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = await User.create({ username, email, password: hashedPassword, role: 'siswa', nama_lengkap, kelas });
+    logger.info(`New user registered: ${username} (ID: ${userId}, Email: ${email}) from IP: ${req.ip}`);
     res.status(201).json({ id: userId, username });
   } catch (error) {
+    logger.error(`Registration error for username: ${username} - ${error.message}`);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -32,12 +35,15 @@ const login = async (req, res) => {
   try {
     const user = await User.findByUsername(username);
     if (!user || !(await bcrypt.compare(password, user.password))) {
+      logger.warn(`Failed login attempt for username: ${username} from IP: ${req.ip}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
+    logger.info(`Successful login for user: ${username} (ID: ${user.id}, Role: ${user.role}) from IP: ${req.ip}`);
     res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
   } catch (error) {
+    logger.error(`Login error for username: ${username} - ${error.message}`);
     res.status(500).json({ error: 'Server error' });
   }
 };

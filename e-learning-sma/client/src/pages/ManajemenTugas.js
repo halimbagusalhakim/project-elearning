@@ -528,16 +528,16 @@ const ManajemenTugas = () => {
                     <form onSubmit={handleCreateAssignment}>
                     <div className="form-group">
                       <label htmlFor="kelas_id">Pilih Kelas:</label>
-                      <select
-                        id="kelas_id"
-                        name="kelas_id"
-                        value={createData.kelas_id || ''}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Pilih Kelas</option>
-                        {userRole === 'admin' ? (
-                          Array.isArray(adminClasses) && adminClasses.length > 0 ? (
+                      {userRole === 'admin' ? (
+                        <select
+                          id="kelas_id"
+                          name="kelas_id"
+                          value={createData.kelas_id || ''}
+                          onChange={handleInputChange}
+                          required
+                        >
+                          <option value="">Pilih Kelas</option>
+                          {Array.isArray(adminClasses) && adminClasses.length > 0 ? (
                             adminClasses.map((classItem) => {
                               console.log('Rendering admin class option:', classItem);
                               return (
@@ -548,19 +548,16 @@ const ManajemenTugas = () => {
                             })
                           ) : (
                             <option disabled>Tidak ada kelas tersedia</option>
-                          )
-                        ) : (
-                          Array.isArray(teacherClasses) && teacherClasses.length > 0 ? (
-                            teacherClasses.map((classItem) => (
-                              <option key={classItem.id} value={classItem.id}>
-                                {classItem.nama_kelas} ({classItem.kode_kelas})
-                              </option>
-                            ))
-                          ) : (
-                            <option disabled>Tidak ada kelas tersedia</option>
-                          )
-                        )}
-                      </select>
+                          )}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          readOnly
+                          value={selectedClass ? `${selectedClass.nama_kelas} (${selectedClass.kode_kelas})` : ''}
+                          className="readonly-input"
+                        />
+                      )}
                     </div>
                     <div className="form-group">
                       <label htmlFor="judul">Judul Tugas:</label>

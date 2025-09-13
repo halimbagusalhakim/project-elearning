@@ -29,7 +29,7 @@ const DashboardSiswa = () => {
       ]);
 
       console.log('Classes API response:', classesRes.data);
-      setClasses(classesRes.data);
+      setClasses(Array.isArray(classesRes.data) ? classesRes.data : []);
       setRecentMaterials(materialsRes.data);
       setUpcomingAssignments(assignmentsRes.data);
     } catch (error) {
@@ -100,7 +100,7 @@ const DashboardSiswa = () => {
             <p>Belum ada kelas yang tersedia</p>
           ) : (
             <div>
-              {classes
+              {(Array.isArray(classes) ? classes : [])
                 .filter(classItem => !myRegistrations.some(reg => reg.class_id === classItem.id && reg.status === 'approved'))
                 .slice(0, 5)
                 .map((classItem) => (
@@ -120,7 +120,7 @@ const DashboardSiswa = () => {
                     </button>
                   </div>
                 ))}
-              {classes.length > 5 && (
+              {Array.isArray(classes) && classes.length > 5 && (
                 <p>+ {classes.length - 5} kelas lainnya</p>
               )}
             </div>

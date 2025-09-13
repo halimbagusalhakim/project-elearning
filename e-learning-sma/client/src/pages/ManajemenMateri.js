@@ -21,6 +21,14 @@ const ManajemenMateri = () => {
     file: null,
   });
 
+  // Override setShowCreateModal to set kelas_id for teachers when opening modal
+  const openCreateModal = () => {
+    if (userRole !== 'admin' && selectedClass) {
+      setCreateData((prev) => ({ ...prev, kelas_id: selectedClass.id }));
+    }
+    setShowCreateModal(true);
+  };
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState({
     id: '',
@@ -280,7 +288,7 @@ const ManajemenMateri = () => {
       {deleteError && <div className="error-message">{deleteError}</div>}
 
       <div className="action-bar">
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+        <button className="btn btn-primary" onClick={openCreateModal}>
           + Tambah Materi Baru
         </button>
       </div>

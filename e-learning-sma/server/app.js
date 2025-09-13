@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const morgan = require('morgan');
+const logger = require('./utils/logger');
 require('dotenv').config();
 
 // Import routes
@@ -25,6 +27,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// HTTP request logging
+app.use(morgan('combined', {
+  stream: {
+    write: (message) => logger.http(message.trim())
+  }
+}));
+
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -43,6 +52,7 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  logger.error(`${err.message} - ${req.method} ${req.originalUrl} - ${req.ip}`);
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
