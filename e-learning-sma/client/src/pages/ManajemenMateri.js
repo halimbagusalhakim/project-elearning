@@ -65,13 +65,22 @@ const ManajemenMateri = () => {
       setLoading(true);
       const response = await classesAPI.getTeacherClasses();
       if (response && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        setTeacherClasses(response.data);
+        // Map class IDs to strings for consistency
+        const classes = response.data.map(cls => ({
+          ...cls,
+          id: cls.id.toString(),
+        }));
+        setTeacherClasses(classes);
       } else {
         // Fallback: if teacher has no classes, fetch all classes
         console.warn('Teacher has no classes assigned, fetching all classes as fallback');
         const allClassesResponse = await classesAPI.getAll();
-        if (allClassesResponse && allClassesResponse.data && Array.isArray(allClassesResponse.data)) {
-          setTeacherClasses(allClassesResponse.data);
+        if (allClassesResponse && allClassesResponse.data && Array.isArray(allClassesResponse.data.data)) {
+          const classes = allClassesResponse.data.data.map(cls => ({
+            ...cls,
+            id: cls.id.toString(),
+          }));
+          setTeacherClasses(classes);
         } else {
           setTeacherClasses([]);
         }
@@ -83,6 +92,29 @@ const ManajemenMateri = () => {
       setLoading(false);
     }
   };
+
+  // const fetchAllClasses = async () => {
+  //   try {
+  //     setLoading(true);
+  //     console.log('Fetching all classes...');
+  //     const response = await classesAPI.getAll();
+  //     console.log('Classes API response:', response);
+  //     if (response && response.data && Array.isArray(response.data.data)) {
+  //       const classes = response.data.data.map(cls => ({
+  //         ...cls,
+  //         id: cls.id.toString(),
+  //       }));
+  //       setTeacherClasses(classes);
+  //       console.log('Classes set in state:', classes);
+  //     } else {
+  //       console.error('Response data for classes is empty, undefined, or not an array');
+  //     }
+  //   } catch (err) {
+  //     console.error('Gagal memuat daftar kelas:', err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const fetchAllMaterials = async () => {
     try {
@@ -99,17 +131,20 @@ const ManajemenMateri = () => {
 
   const fetchAllClasses = async () => {
     try {
+      setLoading(true);
       console.log('Fetching all classes...');
       const response = await classesAPI.getAll();
       console.log('Classes API response:', response);
-      if (response && response.data && Array.isArray(response.data)) {
-        setTeacherClasses(response.data);
-        console.log('Classes set in state:', response.data);
+      if (response && response.data && Array.isArray(response.data.data)) {
+        setTeacherClasses(response.data.data);
+        console.log('Classes set in state:', response.data.data);
       } else {
         console.error('Response data for classes is empty, undefined, or not an array');
       }
     } catch (err) {
       console.error('Gagal memuat daftar kelas:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

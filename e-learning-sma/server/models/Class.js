@@ -34,7 +34,7 @@ class Class {
     }
   }
 
-  static async getAll() {
+   static async getAll() {
     try {
       const sql = `
         SELECT c.*, u.nama_lengkap as guru_nama

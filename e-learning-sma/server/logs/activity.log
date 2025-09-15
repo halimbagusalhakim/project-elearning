@@ -5,3 +5,55 @@
 {"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-13 19:49:13:4913"}
 {"level":"info","message":"Successful login for user: hendro (ID: 10, Role: siswa) from IP: ::1","timestamp":"2025-09-15 09:06:35:635"}
 {"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 13:26:15:2615"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 21:40:30:4030"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 21:49:13:4913"}
+{"level":"error","message":"Unexpected token 'K', \"Key: Autho\"... is not valid JSON - GET /api/auth/login - ::1","timestamp":"2025-09-15 21:52:24:5224"}
+{"level":"error","message":"Unexpected token 'K', \"Key: Autho\"... is not valid JSON - GET /api/auth/login - ::1","timestamp":"2025-09-15 21:52:36:5236"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 21:53:07:537"}
+{"level":"error","message":"Expected ',' or '}' after property value in JSON at position 52 (line 2 column 23) - GET /api/auth/profile - ::1","timestamp":"2025-09-15 21:55:04:554"}
+{"level":"error","message":"Unexpected token 'K', \"Key: Autho\"... is not valid JSON - GET /api/auth/profile - ::1","timestamp":"2025-09-15 21:56:15:5615"}
+{"level":"error","message":"Expected property name or '}' in JSON at position 1 (line 1 column 2) - GET /api/auth/profile - ::1","timestamp":"2025-09-15 21:56:25:5625"}
+{"level":"error","message":"Expected property name or '}' in JSON at position 1 (line 1 column 2) - GET /api/auth/profile - ::1","timestamp":"2025-09-15 21:56:26:5626"}
+{"level":"error","message":"Expected property name or '}' in JSON at position 1 (line 1 column 2) - GET /api/auth/profile - ::1","timestamp":"2025-09-15 21:56:34:5634"}
+{"level":"info","message":"New user registered: newuser (ID: 16, Email: newuser@example.com) from IP: ::1","timestamp":"2025-09-15 22:10:53:1053"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:22:05:225"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:30:2630"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:48:2648"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:50:2650"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:51:2651"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:52:2652"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:53:2653"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:54:2654"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:54:2654"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:55:2655"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:56:2656"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:57:2657"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 22:26:58:2658"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:28:21:2821"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:28:52:2852"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:28:57:2857"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:28:59:2859"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:29:00:290"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 22:30:33:3033"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:32:30:3230"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:33:34:3334"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 22:34:34:3434"}
+{"level":"info","message":"Successful login for user: hendro (ID: 10, Role: siswa) from IP: ::1","timestamp":"2025-09-15 22:35:11:3511"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 22:36:23:3623"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 22:36:24:3624"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 22:36:59:3659"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 22:37:17:3717"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 23:38:41:3841"}
+{"level":"error","message":"Login error for username: undefined - Bind parameters must not contain undefined. To pass SQL NULL specify JS null","timestamp":"2025-09-15 23:46:43:4643"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-15 23:47:11:4711"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-15 23:47:46:4746"}
+{"level":"info","message":"Successful login for user: hendro (ID: 10, Role: siswa) from IP: ::1","timestamp":"2025-09-15 23:48:17:4817"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 00:24:01:241"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 00:32:07:327"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 00:32:56:3256"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 00:47:14:4714"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 00:53:04:534"}
+{"level":"info","message":"Successful login for user: admin (ID: 8, Role: admin) from IP: ::1","timestamp":"2025-09-16 01:20:39:2039"}
+{"level":"info","message":"Successful login for user: tujiyo (ID: 9, Role: guru) from IP: ::1","timestamp":"2025-09-16 01:21:35:2135"}
+{"level":"info","message":"Successful login for user: hendro (ID: 10, Role: siswa) from IP: ::1","timestamp":"2025-09-16 01:22:04:224"}
+{"level":"info","message":"Successful login for user: hendro (ID: 10, Role: siswa) from IP: ::1","timestamp":"2025-09-16 01:22:18:2218"}

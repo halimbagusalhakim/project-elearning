@@ -5,7 +5,6 @@ const morgan = require('morgan');
 const logger = require('./utils/logger');
 require('dotenv').config();
 
-// Import routes
 const authRoutes = require('./routes/authRoutes');
 const classRoutes = require('./routes/classRoutes');
 const materialRoutes = require('./routes/materialRoutes');

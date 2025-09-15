@@ -92,8 +92,8 @@ const ManajemenTugas = () => {
       console.log('Fetched classes data:', response.data);
 
       // Normalize data: map to include id as string for select value compatibility
-      const classes = Array.isArray(response.data)
-        ? response.data.map(cls => {
+      const classes = Array.isArray(response.data.data)
+        ? response.data.data.map(cls => {
             console.log('Class id type:', typeof cls.id, 'value:', cls.id);
             return {
               ...cls,
