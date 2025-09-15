@@ -67,7 +67,16 @@ const ManajemenKelas = () => {
         response = await classesAPI.getTeacherClasses();
       }
 
-      setMyClasses(response.data);
+      console.log('Classes API response data:', response.data);
+      // Defensive check to ensure myClasses is always an array
+      if (Array.isArray(response.data)) {
+        setMyClasses(response.data);
+      } else if (response.data && Array.isArray(response.data.data)) {
+        setMyClasses(response.data.data);
+      } else {
+        setMyClasses([]);
+        console.error('Unexpected classes data format:', response.data);
+      }
     } catch (error) {
       setError('Gagal memuat kelas');
       console.error('Error fetching classes:', error);

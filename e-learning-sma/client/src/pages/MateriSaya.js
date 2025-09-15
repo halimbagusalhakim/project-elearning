@@ -103,9 +103,7 @@ const MateriSaya = () => {
                     ) : (
                       <span className="no-file">Tidak ada file</span>
                     )}
-                    <button className="btn btn-secondary">
-                      Lihat Detail
-                    </button>
+
                   </div>
                 </div>
               ))}
